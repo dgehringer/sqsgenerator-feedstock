@@ -1,17 +1,17 @@
 {% set name = "sqsgenerator" %}
-{% set version = "0.0.1" %}
+{% set version = "0.0.4" %}
 
 package:
   name: {{ name|lower }}
   version: {{ version }}
 
 source:
-  url: https://github.com/dnoeger/{{name}}/archive/{{version}}.tar.gz
-  sha256: b7550c645af75e5b50711c1c83a6ba4ef6461616cdf48f33cb42cb8893ce2c83
+  url: https://github.com/dnoeger/{{ name }}/archive/v{{ version }}.tar.gz
+  sha256: 30b5c1011eff8d9f8d9bd24008b028555c3bd11bf5a5b0828b946cb57cfcd82d
 
 build:
   number: 0
-  script: "{{ PYTHON }} -m pip install . -vv"
+  script: {{ PYTHON }} -m pip install . -vv
   skip: true  # [not linux or py<35]
 
 requirements:
@@ -21,11 +21,11 @@ requirements:
     - python
     - pip
     - cython
-    - gmp 
+    - gmp
     - pymatgen
   run:
     - python
-    - gmp 
+    - gmp
     - pymatgen
 
 test:
@@ -37,7 +37,7 @@ about:
   license: GPL-3.0
   license_family: GPL
   license_file: LICENSE
-  summary: 'A command line tool written in Python/Cython for finding optimized SQS structures'
+  summary: A command line tool written in Python/Cython for finding optimized SQS structures
 
   description: |
     This package is a Special Quasirandom Structure generator written 
@@ -49,4 +49,4 @@ about:
 extra:
   recipe-maintainers:
     - jan-janssen
-    - dnoeger 
+    - dgehringer
