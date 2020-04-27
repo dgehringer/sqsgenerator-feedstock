@@ -25,12 +25,15 @@ requirements:
     - pymatgen
   run:
     - python
+    - pip
     - gmp
     - pymatgen
 
 test:
   imports:
     - sqsgenerator
+  commands:
+    - pip check
 
 about:
   home: https://github.com/dnoeger/sqsgenerator
