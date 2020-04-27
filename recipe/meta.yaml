@@ -26,6 +26,7 @@ requirements:
   run:
     - python
     - pip
+    - cython
     - gmp
     - pymatgen
 
