@@ -5,9 +5,13 @@ Home: https://github.com/dnoeger/sqsgenerator
 
 Package license: GPL-3.0
 
-Feedstock license: BSD-3-Clause
+Feedstock license: [BSD-3-Clause](https://github.com/conda-forge/sqsgenerator-feedstock/blob/master/LICENSE.txt)
 
 Summary: A command line tool written in Python/Cython for finding optimized SQS structures
+
+Development: https://github.com/dnoeger/sqsgenerator
+
+Documentation: https://github.com/dnoeger/sqsgenerator
 
 This package is a Special Quasirandom Structure generator written
 in Python3/Cython. Please note that the programm currently only
