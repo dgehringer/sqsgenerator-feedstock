@@ -11,29 +11,38 @@ source:
 
 build:
   number: 0
+  script_env:
+    - SQS_Boost_USE_STATIC_LIBS=ON
+    - SQS_CMAKE_CXX_FLAGS="-static-libstdc++"
   script: {{ PYTHON }} -m pip install . -vv
   skip: true  # [win or py<35]
 
 requirements:
   build:
-    - {{ compiler('c') }}
     - {{ compiler('cxx') }}
     - cmake
     - make
+    - libboost
+    - py-boost
+    - numpy
+    - llvm-openmp  # [osx]
+    - libgomp      # [linux]
   host:
-    - python
     - pip
-    - cython
-    - gmp
-    - pymatgen
-    - boost
-    - boost-cpp
+    - python
+    - libboost
+    - py-boost
+    - numpy
   run:
+    - rich
+    - click
     - python
-    - pip
-    - cython
-    - gmp
-    - pymatgen
+    - pyyaml
+    - numpy
+    - attrdict
+    - frozendict
+    - llvm-openmp  # [osx]
+    - libgomp      # [linux]
 
 test:
   imports:
@@ -42,18 +51,17 @@ test:
     - pip check
 
 about:
-  home: https://github.com/dnoeger/sqsgenerator
-  license: GPL-3.0
-  license_family: GPL
+  home: https://github.com/dgehringer/sqsgenerator
+  license: MIT
+  license_family: MIT
   license_file: LICENSE
-  summary: A command line tool written in Python/Cython for finding optimized SQS structures
+  summary: A command line tool written in Python/C++ for finding optimized SQS structures
 
   description: |
     This package is a Special Quasirandom Structure generator written 
-    in Python3/Cython. Please note that the programm currently only 
-    works with Python 3.
-  doc_url: https://github.com/dnoeger/sqsgenerator
-  dev_url: https://github.com/dnoeger/sqsgenerator
+    in Python3/C++
+  doc_url: https://sqsgenerator.readthedocs.io/en/latest
+  dev_url: https://github.com/dgehringer/sqsgenerator
 
 extra:
   recipe-maintainers:
