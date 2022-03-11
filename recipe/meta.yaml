@@ -6,37 +6,41 @@ package:
   version: {{ version }}
 
 source:
-  url: https://github.com/dnoeger/{{ name }}/archive/v{{ version }}.tar.gz
+  url: https://github.com/dgehringer/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
   sha256: feca0e549d0084fbc96b00afda8035c38fbcb09c1825780025af4c7954da890c
 
+
 build:
-  number: 0
-  script_env:
-    - SQS_Boost_USE_STATIC_LIBS=ON
-    - SQS_CMAKE_CXX_FLAGS="-static-libstdc++"
+  number: 2
   script: {{ PYTHON }} -m pip install . -vv
   skip: true  # [win or py<35]
 
 requirements:
   build:
-    - {{ compiler('cxx') }}
-    - cmake
+    - pip 
     - make
-    - numpy
+    - cmake
     - boost
     - boost-cpp
+    - numpy
     - llvm-openmp  # [osx]
     - libgomp      # [linux]
+    - {{ compiler('cxx') }}
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
   host:
-    - pip
+    - pip 
     - python
     - numpy
     - boost
-    - boost-cpp
+    - boost-cpp 
+    - llvm-openmp  # [osx]
+    - libgomp      # [linux]
   run:
     - rich
     - click
     - python
+    - boost
+    - boost-cpp
     - pyyaml
     - attrdict
     - frozendict
