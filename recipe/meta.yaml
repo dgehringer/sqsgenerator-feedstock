@@ -26,6 +26,8 @@ requirements:
     - cython
     - gmp
     - pymatgen
+    - boost
+    - boost-cpp
   run:
     - python
     - pip
