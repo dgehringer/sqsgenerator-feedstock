@@ -8,8 +8,6 @@ package:
 source:
   url: https://github.com/dnoeger/{{ name }}/archive/v{{ version }}.tar.gz
   sha256: feca0e549d0084fbc96b00afda8035c38fbcb09c1825780025af4c7954da890c
-  patches:
-    - pymatgen.patch
 
 build:
   number: 0
