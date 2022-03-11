@@ -22,27 +22,27 @@ requirements:
     - {{ compiler('cxx') }}
     - cmake
     - make
-    - libboost
-    - py-boost
     - numpy
+    - boost
+    - boost-cpp
     - llvm-openmp  # [osx]
     - libgomp      # [linux]
   host:
     - pip
     - python
-    - libboost
-    - py-boost
     - numpy
+    - boost
+    - boost-cpp
   run:
     - rich
     - click
     - python
     - pyyaml
-    - numpy
     - attrdict
     - frozendict
     - llvm-openmp  # [osx]
     - libgomp      # [linux]
+    - {{ pin_compatible('numpy') }}
 
 test:
   imports:
