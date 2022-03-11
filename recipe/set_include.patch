@@ -1,0 +1,32 @@
+Index: sqsgenerator/core/include/structure_utils.hpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqsgenerator/core/include/structure_utils.hpp b/sqsgenerator/core/include/structure_utils.hpp
+--- a/sqsgenerator/core/include/structure_utils.hpp	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
++++ b/sqsgenerator/core/include/structure_utils.hpp	(date 1647035925000)
+@@ -8,6 +8,7 @@
+ 
+ #include "types.hpp"
+ #include "utils.hpp"
++#include <set>
+ #include <vector>
+ #include <limits>
+ #include <algorithm>
+Index: sqsgenerator/core/include/utils.hpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqsgenerator/core/include/utils.hpp b/sqsgenerator/core/include/utils.hpp
+--- a/sqsgenerator/core/include/utils.hpp	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
++++ b/sqsgenerator/core/include/utils.hpp	(date 1647035947000)
+@@ -6,6 +6,7 @@
+ #define SQSGENERATOR_UTILS_HPP
+ 
+ #include "types.hpp"
++#include <set>
+ #include <sstream>
+ #include <stdexcept>
+ #include <boost/multi_array.hpp>
