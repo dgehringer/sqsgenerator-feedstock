@@ -1,0 +1,78 @@
+Index: sqsgenerator/core/src/sqs.cpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqsgenerator/core/src/sqs.cpp b/sqsgenerator/core/src/sqs.cpp
+--- a/sqsgenerator/core/src/sqs.cpp	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
++++ b/sqsgenerator/core/src/sqs.cpp	(date 1647084405000)
+@@ -122,8 +122,9 @@
+ 
+     std::vector<size_t> convert_pair_list(const std::vector<AtomPair> &pair_list) {
+         std::vector<size_t> result;
++        pair_shell_matrix_t::index i, j, _, shell_index;
+         for (const auto &pair : pair_list) {
+-            auto[i, j, _, shell_index] = pair;
++            std::tie(i, j, _, shell_index) = pair;
+             result.push_back(i);
+             result.push_back(j);
+             result.push_back(shell_index);
+@@ -277,7 +278,8 @@
+                 iteration_ranks = compute_ranks(settings, threads_per_rank);
+             }
+             #pragma omp barrier
+-            auto [start_it, end_it] = iteration_ranks[mpi_rank][thread_id];
++            rank_t start_it, end_it;
++            std::tie(start_it, end_it) = iteration_ranks[mpi_rank][thread_id];
+             #pragma omp critical
+             {
+                 BOOST_LOG_TRIVIAL(debug) << "do_pair_iterations::rank::" << mpi_rank << "::thread::" << thread_id << "::iteration_start = " << start_it;
+Index: sqsgenerator/core/include/structure_utils.hpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqsgenerator/core/include/structure_utils.hpp b/sqsgenerator/core/include/structure_utils.hpp
+--- a/sqsgenerator/core/include/structure_utils.hpp	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
++++ b/sqsgenerator/core/include/structure_utils.hpp	(date 1647035925000)
+@@ -8,6 +8,7 @@
+ 
+ #include "types.hpp"
+ #include "utils.hpp"
++#include <set>
+ #include <vector>
+ #include <limits>
+ #include <algorithm>
+Index: sqsgenerator/core/include/utils.hpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqsgenerator/core/include/utils.hpp b/sqsgenerator/core/include/utils.hpp
+--- a/sqsgenerator/core/include/utils.hpp	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
++++ b/sqsgenerator/core/include/utils.hpp	(date 1647035947000)
+@@ -6,6 +6,7 @@
+ #define SQSGENERATOR_UTILS_HPP
+ 
+ #include "types.hpp"
++#include <set>
+ #include <sstream>
+ #include <stdexcept>
+ #include <boost/multi_array.hpp>
+Index: sqsgenerator/core/include/types.hpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqsgenerator/core/include/types.hpp b/sqsgenerator/core/include/types.hpp
+--- a/sqsgenerator/core/include/types.hpp	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
++++ b/sqsgenerator/core/include/types.hpp	(date 1647084405000)
+@@ -54,7 +54,7 @@
+     using Shape = std::array<size_t, NDims>;
+ 
+     // The array consists of {size_t i, size_t j, size_t shell, size_t shell_index}
+-    typedef std::array<pair_shell_matrix_t::index, 4> AtomPair;
++    typedef std::tuple<pair_shell_matrix_t::index, pair_shell_matrix_t::index, pair_shell_matrix_t::index, pair_shell_matrix_t::index> AtomPair;
+ 
+     constexpr species_t ALL_SITES = -1;
+ }

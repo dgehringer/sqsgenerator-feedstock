@@ -9,7 +9,7 @@ source:
   url: https://github.com/dgehringer/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
   sha256: feca0e549d0084fbc96b00afda8035c38fbcb09c1825780025af4c7954da890c
   patches:
-    - set_include.patch
+    - clang.patch
 
 
 build:
