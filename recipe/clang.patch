@@ -145,8 +145,26 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 ===================================================================
 diff --git a/sqsgenerator/settings/functional.py b/sqsgenerator/settings/functional.py
 --- a/sqsgenerator/settings/functional.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
-+++ b/sqsgenerator/settings/functional.py	(date 1647253594172)
-@@ -31,11 +31,11 @@
++++ b/sqsgenerator/settings/functional.py	(date 1647256978546)
+@@ -1,8 +1,8 @@
+ import enum
+-import attrdict
+ import functools
+ import typing as T
+ from sqsgenerator.core import get_function_logger
++from sqsgenerator.fallback.attrdict import AttrDict
+ from sqsgenerator.settings.exceptions import BadSettings
+ 
+ 
+@@ -24,18 +24,18 @@
+ 
+     def _decorator(f: T.Callable):
+         @functools.wraps(f)
+-        def _wrapped(settings: attrdict.AttrDict):
++        def _wrapped(settings: AttrDict):
+             is_required = get_required(settings)
+             k = get_key(settings)
+             nonlocal name
              if k not in settings:
                  if is_required:
                      if not have_default:
@@ -364,6 +382,43 @@ diff --git a/test/cli/bindings/test_structure.py b/test/cli/bindings/test_struct
  
  
  if __name__ == '__main__':
+Index: test/cli/bindings/test_readers.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/test/cli/bindings/test_readers.py b/test/cli/bindings/test_readers.py
+--- a/test/cli/bindings/test_readers.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
++++ b/test/cli/bindings/test_readers.py	(date 1647257018414)
+@@ -3,9 +3,9 @@
+ import io
+ import random
+ import unittest
+-import attrdict
+ import numpy as np
+ from sqsgenerator.compat import have_mpi_support
++from sqsgenerator.fallback.attrdict import AttrDict
+ from sqsgenerator.core import default_shell_distances
+ from sqsgenerator.adapters import to_ase_atoms, to_pymatgen_structure
+ from sqsgenerator.io import read_settings_file
+@@ -27,7 +27,7 @@
+ 
+ 
+ def settings(recursive=True, **kwargs):
+-    return attrdict.AttrDict({**kwargs}, recursive=recursive)
++    return AttrDict({**kwargs}, recursive=recursive)
+ 
+ 
+ def test_function(test_f):
+@@ -62,7 +62,7 @@
+         self.assertTrue(coords_close)
+ 
+     def override_default(self, **kwargs):
+-        cp = attrdict.AttrDict(self.processed.copy())
++        cp = AttrDict(self.processed.copy())
+         cp.update(**kwargs)
+         return cp
+ 
 Index: sqsgenerator/fallback/attrdict/mixins.py
 IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
@@ -958,7 +1013,7 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 ===================================================================
 diff --git a/setup.py b/setup.py
 --- a/setup.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
-+++ b/setup.py	(date 1647252473608)
++++ b/setup.py	(date 1647257109244)
 @@ -63,20 +63,20 @@
              extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
              cfg = 'Debug' if ext.debug else 'Release'
@@ -1011,6 +1066,15 @@ diff --git a/setup.py b/setup.py
                      ]
                  else:
                      cmake_args += [
+@@ -143,7 +143,7 @@
+         'build_ext': CMakeBuildExt,
+         'install': InstallCustom
+     },
+-    install_requires=['attrdict', 'numpy', 'click', 'rich>=9.11.0', 'pyyaml', 'frozendict'],
++    install_requires=['numpy', 'click', 'rich>=9.11.0', 'pyyaml', 'frozendict'],
+     entry_points={
+         'console_scripts': ['sqsgen=sqsgenerator.cli:cli']
+     },
 Index: sqsgenerator/core/src/sqs.cpp
 IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
