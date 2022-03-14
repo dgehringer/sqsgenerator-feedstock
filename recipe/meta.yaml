@@ -1,36 +1,55 @@
 {% set name = "sqsgenerator" %}
-{% set version = "0.0.5" %}
+{% set version = "0.1" %}
 
 package:
   name: {{ name|lower }}
   version: {{ version }}
 
 source:
-  url: https://github.com/dnoeger/{{ name }}/archive/v{{ version }}.tar.gz
-  sha256: 85407d2525947cd9eaab5e4e92ee84c568078e1967ffbd70c3733961269cfc7d
+  url: https://github.com/dgehringer/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: feca0e549d0084fbc96b00afda8035c38fbcb09c1825780025af4c7954da890c
   patches:
-    - pymatgen.patch
+    - clang.patch
+
 
 build:
-  number: 3
+  number: 2
   script: {{ PYTHON }} -m pip install . -vv
   skip: true  # [win or py<35]
 
 requirements:
   build:
-    - {{ compiler('c') }}
+    - pip 
+    - make
+    - cmake
+    - boost
+    - boost-cpp
+    - numpy
+    - llvm-openmp  # [osx]
+    - libgomp      # [linux]
+    - {{ compiler('cxx') }}
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
   host:
+    - pip 
     - python
-    - pip
-    - cython
-    - gmp
-    - pymatgen
+    - numpy
+    - boost
+    - boost-cpp 
+    - llvm-openmp  # [osx]
+    - libgomp      # [linux]
   run:
+    - pip 
+    - rich
+    - click
     - python
-    - pip
-    - cython
-    - gmp
-    - pymatgen
+    - boost
+    - boost-cpp
+    - pyyaml
+    - attrdict
+    - frozendict
+    - llvm-openmp  # [osx]
+    - libgomp      # [linux]
+    - {{ pin_compatible('numpy') }}
 
 test:
   imports:
@@ -39,18 +58,17 @@ test:
     - pip check
 
 about:
-  home: https://github.com/dnoeger/sqsgenerator
-  license: GPL-3.0
-  license_family: GPL
+  home: https://github.com/dgehringer/sqsgenerator
+  license: MIT
+  license_family: MIT
   license_file: LICENSE
-  summary: A command line tool written in Python/Cython for finding optimized SQS structures
+  summary: A command line tool written in Python/C++ for finding optimized SQS structures
 
   description: |
     This package is a Special Quasirandom Structure generator written 
-    in Python3/Cython. Please note that the programm currently only 
-    works with Python 3.
-  doc_url: https://github.com/dnoeger/sqsgenerator
-  dev_url: https://github.com/dnoeger/sqsgenerator
+    in Python3/C++
+  doc_url: https://sqsgenerator.readthedocs.io/en/latest
+  dev_url: https://github.com/dgehringer/sqsgenerator
 
 extra:
   recipe-maintainers:

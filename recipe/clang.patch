@@ -1,0 +1,1153 @@
+Index: sqsgenerator/commands/analyse.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqsgenerator/commands/analyse.py b/sqsgenerator/commands/analyse.py
+--- a/sqsgenerator/commands/analyse.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
++++ b/sqsgenerator/commands/analyse.py	(date 1647259082333)
+@@ -10,9 +10,9 @@
+ from rich import box
+ from rich.text import Text
+ from rich.table import Table
+-from attrdict import AttrDict
+ from sqsgenerator.io import dumps, to_dict
+ from sqsgenerator.core import rank_structure
++from sqsgenerator.fallback.attrdict import AttrDict
+ from operator import attrgetter as attr, itemgetter as item
+ from sqsgenerator.commands.help import parameter_help as help, command_help
+ from sqsgenerator.settings import construct_settings, process_settings, defaults
+Index: sqsgenerator/commands/export.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqsgenerator/commands/export.py b/sqsgenerator/commands/export.py
+--- a/sqsgenerator/commands/export.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
++++ b/sqsgenerator/commands/export.py	(date 1647259370472)
+@@ -4,8 +4,8 @@
+ 
+ import os
+ import click
+-from attrdict import AttrDict
+ from sqsgenerator.public import extract_structures
++from sqsgenerator.fallback.attrdict import AttrDict
+ from sqsgenerator.settings.readers import read_structure
+ from sqsgenerator.compat import Feature as F, have_feature
+ from sqsgenerator.commands.common import click_settings_file, error
+Index: sqsgenerator/settings/defaults.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqsgenerator/settings/defaults.py b/sqsgenerator/settings/defaults.py
+--- a/sqsgenerator/settings/defaults.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
++++ b/sqsgenerator/settings/defaults.py	(date 1647244977512)
+@@ -1,7 +1,8 @@
++
+ import collections
+ import numpy as np
+-from attrdict import AttrDict
+ from operator import itemgetter as item
++from sqsgenerator.fallback.attrdict import AttrDict
+ from sqsgenerator.settings.utils import build_structure, to_internal_composition_specs
+ from sqsgenerator.settings.functional import const, if_
+ from sqsgenerator.core import IterationMode, Structure, default_shell_distances as default_shell_distances_core, \
+Index: sqsgenerator/settings/utils.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqsgenerator/settings/utils.py b/sqsgenerator/settings/utils.py
+--- a/sqsgenerator/settings/utils.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
++++ b/sqsgenerator/settings/utils.py	(date 1647252159621)
+@@ -58,7 +58,7 @@
+             if k == 0:
+                 return k
+             else:
+-                raise BadSettings('I can only iterpret "0" as an atomic species')
++                raise BadSettings('I can only interpret "0" as an atomic species')
+         else:
+             return symbol_to_z(k)
+ 
+Index: sqsgenerator/settings/functional.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqsgenerator/settings/functional.py b/sqsgenerator/settings/functional.py
+--- a/sqsgenerator/settings/functional.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
++++ b/sqsgenerator/settings/functional.py	(date 1647256978546)
+@@ -1,8 +1,8 @@
+ import enum
+-import attrdict
+ import functools
+ import typing as T
+ from sqsgenerator.core import get_function_logger
++from sqsgenerator.fallback.attrdict import AttrDict
+ from sqsgenerator.settings.exceptions import BadSettings
+ 
+ 
+@@ -24,18 +24,18 @@
+ 
+     def _decorator(f: T.Callable):
+         @functools.wraps(f)
+-        def _wrapped(settings: attrdict.AttrDict):
++        def _wrapped(settings: AttrDict):
+             is_required = get_required(settings)
+             k = get_key(settings)
+             nonlocal name
+             if k not in settings:
+                 if is_required:
+                     if not have_default:
+-                        raise BadSettings(f'Required parameter "{name}" was not found', parameter=name)
++                        raise BadSettings('Required parameter "{}" was not found'.format(name), parameter=name)
+                     else:
+                         # a default is needed but found
+                         df = get_default(settings)
+-                        get_function_logger(f).info(f'Parameter "{name}" was not found defaulting to: "{df}"')
++                        get_function_logger(f).info('Parameter "{}" was not found defaulting to: "{}"'.format(name, df))
+                         return df
+             else:
+                 # we catch the exception here and raise it again, to inject the parameter information automatically
+Index: sqsgenerator/settings/readers.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqsgenerator/settings/readers.py b/sqsgenerator/settings/readers.py
+--- a/sqsgenerator/settings/readers.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
++++ b/sqsgenerator/settings/readers.py	(date 1647254093075)
+@@ -11,9 +11,8 @@
+ import collections
+ import collections.abc
+ from functools import partial
+-from attrdict import AttrDict
+ from operator import itemgetter as item
+-
++from sqsgenerator.fallback.attrdict import AttrDict
+ from sqsgenerator.io import read_structure_from_file
+ from sqsgenerator.settings.exceptions import BadSettings
+ from sqsgenerator.core import IterationMode, Structure, make_supercell
+@@ -34,14 +33,14 @@
+ @parameter('atol', default=defaults.atol)
+ def read_atol(settings: AttrDict):
+     if not isinstance(settings.atol, float) or settings.atol < 0:
+-        raise BadSettings(f'The absolute tolerance can be only a positive floating point number')
++        raise BadSettings('The absolute tolerance can be only a positive floating point number')
+     return settings.atol
+ 
+ 
+ @parameter('rtol', default=defaults.rtol)
+ def read_rtol(settings: AttrDict):
+     if not isinstance(settings.rtol, float) or settings.rtol < 0:
+-        raise BadSettings(f'The relative tolerance can be only a positive floating point number')
++        raise BadSettings('The relative tolerance can be only a positive floating point number')
+     return settings.rtol
+ 
+ 
+@@ -50,15 +49,15 @@
+     if isinstance(settings.mode, IterationMode):
+         return settings.mode
+     if settings.mode not in IterationMode.names:
+-        raise BadSettings(f'Unknown iteration mode "{settings.mode}". '
+-                          f'Available iteration modes are {list(IterationMode.names.keys())}')
++        raise BadSettings('Unknown iteration mode "{}". '.format(settings.mode) +
++                          'Available iteration modes are {}'.format(list(IterationMode.names.keys())))
+     return IterationMode.names[settings.mode]
+ 
+ 
+ @parameter('iterations', default=defaults.iterations, required=if_(random_mode)(True)(False))
+ def read_iterations(settings: AttrDict):
+     num_iterations = convert(settings.iterations, converter=int_safe,
+-                             message=f'Cannot convert "{settings.iterations}" to int')
++                             message='Cannot convert "{}" to int'.format(settings.iterations))
+     if num_iterations < 0:
+         raise BadSettings('"iterations" must be positive')
+     return num_iterations
+@@ -67,7 +66,7 @@
+ @parameter('max_output_configurations', default=defaults.max_output_configurations)
+ def read_max_output_configurations(settings: AttrDict):
+     num_confs = convert(settings.max_output_configurations, converter=int_safe,
+-                        message=f'Cannot convert "{settings.max_output_configurations}" to int')
++                        message='Cannot convert "{}" to int'.format(settings.max_output_configurations))
+     if num_confs < 0:
+         raise BadSettings('"max_output_configurations" must be positive')
+     return num_confs
+@@ -103,10 +102,10 @@
+             species = list(s['species'])
+             structure = Structure(lattice, coords, species, (True, True, True))
+         else:
+-            raise BadSettings(f'A structure dictionary needs the following fields {needed_fields}')
++            raise BadSettings('A structure dictionary needs the following fields {}'.format(needed_fields))
+ 
+     if structure is None:
+-        raise BadSettings(f'Cannot read structure from the settings, "{type(s)}"')
++        raise BadSettings('Cannot read structure from the settings, "{}"'.format(type(s)))
+     if isinstance(s, dict) and 'supercell' in s:
+         sizes = settings.structure.supercell
+         if len(sizes) != 3:
+@@ -124,8 +123,8 @@
+         sublattice = settings.which
+         allowed_sublattices = {'all', }.union(structure.unique_species)
+         if sublattice not in allowed_sublattices:
+-            raise BadSettings(f'The structure does not have an "{sublattice}" sublattice. '
+-                              f'Possible values would be {allowed_sublattices}')
++            raise BadSettings('The structure does not have an "{}" sublattice. '.format(sublattice) +
++                              'Possible values would be {}'.format(allowed_sublattices))
+         if sublattice == 'all':
+             mask = tuple(range(structure.num_atoms))
+         else:
+@@ -136,9 +135,9 @@
+         if len(sublattice) < 2:
+             raise BadSettings('You need to at least specify two different lattice positions to define a sublattice')
+         if not all(map(isa(int), sublattice)):
+-            raise BadSettings(f'I do only understand integer lists to specify a sublattice')
++            raise BadSettings('I do only understand integer lists to specify a sublattice')
+         if not all(map(lambda _: 0 <= _ < structure.num_atoms, sublattice)):
+-            raise BadSettings(f'All indices in the list must be 0 <= index < {structure.num_atoms}')
++            raise BadSettings('All indices in the list must be 0 <= index < {}'.format(structure.num_atoms))
+         which = tuple(settings.which)
+     else:
+         raise BadSettings('I do not understand your composition specification')
+@@ -150,7 +149,7 @@
+ def read_composition(settings: AttrDict):
+     structure = settings.structure[settings.which]
+     if not isinstance(settings.composition, dict):
+-        raise BadSettings(f'Cannot interpret "composition" settings. I expect a dictionary')
++        raise BadSettings('Cannot interpret "composition" settings. I expect a dictionary')
+ 
+     build_structure(settings.composition, structure)
+     return settings.composition
+@@ -167,7 +166,7 @@
+         raise BadSettings('You need to specify at least one shell-distance')
+     for distance in distances:
+         if distance < 0.0:
+-            raise BadSettings(f'A distance can never be less than zero. You specified "{distance}"')
++            raise BadSettings('A distance can never be less than zero. You specified "{}"'.format(distance))
+     sorted_distances = list(sorted(distances))
+     sorted_distances.insert(0, 0.0)
+     return sorted_distances
+@@ -182,14 +181,15 @@
+     allowed_indices = set(range(1, len(settings.shell_distances)))
+ 
+     parsed_weights = {
+-        convert(shell, to=int, message=f'A shell must be an integer. You specified {shell}'):
+-            convert(weight, to=float, message=f'A weight must be a floating point number. You specified {weight}')
++        convert(shell, to=int, message='A shell must be an integer. You specified {}'.format(shell)):
++            convert(weight, to=float, message='A weight must be a floating point number. You specified {}'.format(weight))
+         for shell, weight in settings.shell_weights.items()
+     }
+ 
+     for shell in parsed_weights.keys():
+         if shell not in allowed_indices:
+-            raise BadSettings(f'The shell {shell} you specified is not allowed. Allowed values are {allowed_indices}')
++            raise BadSettings('The shell {} you specified is not allowed. '
++                              'Allowed values are {}'.format(shell, allowed_indices))
+     return settings.shell_weights
+ 
+ 
+@@ -202,13 +202,13 @@
+         if w.ndim in {2, 3}:
+             expected_shape = (nshells, nums, nums) if w.ndim == 3 else (nums, nums)
+ 
+-            ensure_array_shape(w, expected_shape, f'The 3D "{parameter_name}" you have specified '
+-                                                  f'has a wrong shape ({w.shape}). Expected {expected_shape}')
+-            ensure_array_symmetric(w, f'The "{parameter_name}" parameters are not symmetric')
++            ensure_array_shape(w, expected_shape, 'The 3D "{}" you have specified '.format(parameter_name) +
++                                                  'has a wrong shape ({}). Expected {}'.format(w.shape, expected_shape))
++            ensure_array_symmetric(w, 'The "{}" parameters are not symmetric'.format(parameter_name))
+             return constructor(w)
+ 
+-    raise BadSettings(f'As "{parameter_name}" I do expect a {nums}x{nums} matrix, '
+-                      f'since your structure contains {nums} different species')
++    raise BadSettings('As "{}" I do expect a {}x{} matrix, '.format(parameter_name, nums, nums) +
++                      'since your structure contains {} different species'.format(nums))
+ 
+ 
+ @parameter('pair_weights', default=defaults.pair_weights, required=True)
+@@ -260,10 +260,10 @@
+     if isinstance(settings.threads_per_rank, (list, tuple, np.ndarray)):
+         if len(settings.threads_per_rank) != 1:
+             if not have_mpi_support():
+-                raise BadSettings(f'The module sqsgenerator.core.iteration was not compiled with MPI support')
++                raise BadSettings('The module sqsgenerator.core.iteration was not compiled with MPI support')
+         return list(map(converter, settings.threads_per_rank))
+ 
+-    raise BadSettings(f'Cannot interpret "threads_per_rank" setting.')
++    raise BadSettings('Cannot interpret "threads_per_rank" setting.')
+ 
+ 
+ def process_settings(settings: AttrDict, params: T.Optional[T.Set[str]] = None, ignore: T.Iterable[str]=()) -> AttrDict:
+Index: sqsgenerator/settings/__init__.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqsgenerator/settings/__init__.py b/sqsgenerator/settings/__init__.py
+--- a/sqsgenerator/settings/__init__.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
++++ b/sqsgenerator/settings/__init__.py	(date 1647245261820)
+@@ -1,7 +1,7 @@
+ 
+ import typing as T
+-from attrdict import AttrDict
+ from sqsgenerator.core import IterationSettings
++from sqsgenerator.fallback.attrdict import AttrDict
+ from sqsgenerator.settings.defaults import defaults
+ from sqsgenerator.settings.utils import build_structure
+ from sqsgenerator.settings.exceptions import BadSettings
+Index: test/cli/bindings/test_structure.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/test/cli/bindings/test_structure.py b/test/cli/bindings/test_structure.py
+--- a/test/cli/bindings/test_structure.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
++++ b/test/cli/bindings/test_structure.py	(date 1647253831924)
+@@ -59,9 +59,6 @@
+         with self.assertRaises(ValueError):
+             s.slice_with_species(['Fe'], [0, 1])
+ 
+-    def test_repr(self):
+-        length = len(self.structure)
+-        self.assertTrue(f'len={length}', repr(self.structure))
+ 
+ 
+ if __name__ == '__main__':
+Index: test/cli/bindings/test_readers.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/test/cli/bindings/test_readers.py b/test/cli/bindings/test_readers.py
+--- a/test/cli/bindings/test_readers.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
++++ b/test/cli/bindings/test_readers.py	(date 1647257018414)
+@@ -3,9 +3,9 @@
+ import io
+ import random
+ import unittest
+-import attrdict
+ import numpy as np
+ from sqsgenerator.compat import have_mpi_support
++from sqsgenerator.fallback.attrdict import AttrDict
+ from sqsgenerator.core import default_shell_distances
+ from sqsgenerator.adapters import to_ase_atoms, to_pymatgen_structure
+ from sqsgenerator.io import read_settings_file
+@@ -27,7 +27,7 @@
+ 
+ 
+ def settings(recursive=True, **kwargs):
+-    return attrdict.AttrDict({**kwargs}, recursive=recursive)
++    return AttrDict({**kwargs}, recursive=recursive)
+ 
+ 
+ def test_function(test_f):
+@@ -62,7 +62,7 @@
+         self.assertTrue(coords_close)
+ 
+     def override_default(self, **kwargs):
+-        cp = attrdict.AttrDict(self.processed.copy())
++        cp = AttrDict(self.processed.copy())
+         cp.update(**kwargs)
+         return cp
+ 
+Index: sqsgenerator/fallback/attrdict/mixins.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqsgenerator/fallback/attrdict/mixins.py b/sqsgenerator/fallback/attrdict/mixins.py
+new file mode 100755
+--- /dev/null	(date 1647244850318)
++++ b/sqsgenerator/fallback/attrdict/mixins.py	(date 1647244850318)
+@@ -0,0 +1,212 @@
++
++"""
++Mixin Classes for Attr-support.
++"""
++
++import re
++import six
++from abc import ABCMeta, abstractmethod
++try:
++    from collections.abc import Mapping, MutableMapping, Sequence
++except ImportError:
++    from collections import Mapping, MutableMapping, Sequence
++from sqsgenerator.fallback.attrdict.merge import merge
++
++
++__all__ = ['Attr', 'MutableAttr']
++
++
++@six.add_metaclass(ABCMeta)
++class Attr(Mapping):
++    """
++    A mixin class for a mapping that allows for attribute-style access
++    of values.
++
++    A key may be used as an attribute if:
++     * It is a string
++     * It matches /^[A-Za-z][A-Za-z0-9_]*$/ (i.e., a public attribute)
++     * The key doesn't overlap with any class attributes (for Attr,
++        those would be 'get', 'items', 'keys', 'values', 'mro', and
++        'register').
++
++    If a values which is accessed as an attribute is a Sequence-type
++    (and is not a string/bytes), it will be converted to a
++    _sequence_type with any mappings within it converted to Attrs.
++
++    NOTE: This means that if _sequence_type is not None, then a
++        sequence accessed as an attribute will be a different object
++        than if accessed as an attribute than if it is accessed as an
++        item.
++    """
++    @abstractmethod
++    def _configuration(self):
++        """
++        All required state for building a new instance with the same
++        settings as the current object.
++        """
++
++    @classmethod
++    def _constructor(cls, mapping, configuration):
++        """
++        A standardized constructor used internally by Attr.
++
++        mapping: A mapping of key-value pairs. It is HIGHLY recommended
++            that you use this as the internal key-value pair mapping, as
++            that will allow nested assignment (e.g., attr.foo.bar = baz)
++        configuration: The return value of Attr._configuration
++        """
++        raise NotImplementedError("You need to implement this")
++
++    def __call__(self, key):
++        """
++        Dynamically access a key-value pair.
++
++        key: A key associated with a value in the mapping.
++
++        This differs from __getitem__, because it returns a new instance
++        of an Attr (if the value is a Mapping object).
++        """
++        if key not in self:
++            raise AttributeError(
++                "'{cls} instance has no attribute '{name}'".format(
++                    cls=self.__class__.__name__, name=key
++                )
++            )
++
++        return self._build(self[key])
++
++    def __getattr__(self, key):
++        """
++        Access an item as an attribute.
++        """
++        if key not in self or not self._valid_name(key):
++            raise AttributeError(
++                "'{cls}' instance has no attribute '{name}'".format(
++                    cls=self.__class__.__name__, name=key
++                )
++            )
++
++        return self._build(self[key])
++
++    def __add__(self, other):
++        """
++        Add a mapping to this Attr, creating a new, merged Attr.
++
++        other: A mapping.
++
++        NOTE: Addition is not commutative. a + b != b + a.
++        """
++        if not isinstance(other, Mapping):
++            return NotImplemented
++
++        return self._constructor(merge(self, other), self._configuration())
++
++    def __radd__(self, other):
++        """
++        Add this Attr to a mapping, creating a new, merged Attr.
++
++        other: A mapping.
++
++        NOTE: Addition is not commutative. a + b != b + a.
++        """
++        if not isinstance(other, Mapping):
++            return NotImplemented
++
++        return self._constructor(merge(other, self), self._configuration())
++
++    def _build(self, obj):
++        """
++        Conditionally convert an object to allow for recursive mapping
++        access.
++
++        obj: An object that was a key-value pair in the mapping. If obj
++            is a mapping, self._constructor(obj, self._configuration())
++            will be called. If obj is a non-string/bytes sequence, and
++            self._sequence_type is not None, the obj will be converted
++            to type _sequence_type and build will be called on its
++            elements.
++        """
++        if isinstance(obj, Mapping):
++            obj = self._constructor(obj, self._configuration())
++        elif (isinstance(obj, Sequence) and
++              not isinstance(obj, (six.string_types, six.binary_type))):
++            sequence_type = getattr(self, '_sequence_type', None)
++
++            if sequence_type:
++                obj = sequence_type(self._build(element) for element in obj)
++
++        return obj
++
++    @classmethod
++    def _valid_name(cls, key):
++        """
++        Check whether a key is a valid attribute name.
++
++        A key may be used as an attribute if:
++         * It is a string
++         * It matches /^[A-Za-z][A-Za-z0-9_]*$/ (i.e., a public attribute)
++         * The key doesn't overlap with any class attributes (for Attr,
++            those would be 'get', 'items', 'keys', 'values', 'mro', and
++            'register').
++        """
++        return (
++            isinstance(key, six.string_types) and
++            re.match('^[A-Za-z][A-Za-z0-9_]*$', key) and
++            not hasattr(cls, key)
++        )
++
++
++@six.add_metaclass(ABCMeta)
++class MutableAttr(Attr, MutableMapping):
++    """
++    A mixin class for a mapping that allows for attribute-style access
++    of values.
++    """
++    def _setattr(self, key, value):
++        """
++        Add an attribute to the object, without attempting to add it as
++        a key to the mapping.
++        """
++        super(MutableAttr, self).__setattr__(key, value)
++
++    def __setattr__(self, key, value):
++        """
++        Add an attribute.
++
++        key: The name of the attribute
++        value: The attributes contents
++        """
++        if self._valid_name(key):
++            self[key] = value
++        elif getattr(self, '_allow_invalid_attributes', True):
++            super(MutableAttr, self).__setattr__(key, value)
++        else:
++            raise TypeError(
++                "'{cls}' does not allow attribute creation.".format(
++                    cls=self.__class__.__name__
++                )
++            )
++
++    def _delattr(self, key):
++        """
++        Delete an attribute from the object, without attempting to
++        remove it from the mapping.
++        """
++        super(MutableAttr, self).__delattr__(key)
++
++    def __delattr__(self, key, force=False):
++        """
++        Delete an attribute.
++
++        key: The name of the attribute
++        """
++        if self._valid_name(key):
++            del self[key]
++        elif getattr(self, '_allow_invalid_attributes', True):
++            super(MutableAttr, self).__delattr__(key)
++        else:
++            raise TypeError(
++                "'{cls}' does not allow attribute deletion.".format(
++                    cls=self.__class__.__name__
++                )
++            )
+Index: test/create_structure_utils_test_case.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/test/create_structure_utils_test_case.py b/test/create_structure_utils_test_case.py
+--- a/test/create_structure_utils_test_case.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
++++ b/test/create_structure_utils_test_case.py	(date 1647253146350)
+@@ -8,13 +8,13 @@
+ from pymatgen.util.coord import pbc_shortest_vectors
+ 
+ def write_array(stream, array: np.ndarray, name=None, fmt="{0:.8f}"):
+-    stream.write(f"{name}::array::begin\n")
+-    stream.write(f"{name}::array::ndims {len(array.shape)}\n")
+-    stream.write(f"{name}::array::shape {' '.join(map(str, array.shape))}\n")
+-    stream.write(f"{name}::array::data")
++    stream.write("{}::array::begin\n".format(name))
++    stream.write("{}::array::ndims {}\n".format(name, len(array.shape)))
++    stream.write("{}::array::shape {}\n".format(name, ' '.join(map(str, array.shape))))
++    stream.write("{}::array::data".format(name))
+     for v in array.flat: stream.write(" " + fmt.format(v))
+     stream.write("\n")
+-    stream.write(f"{name}::array::end\n")
++    stream.write("{}::array::end\n".format(name))
+ 
+ 
+ def nditer(A: np.ndarray):
+Index: sqsgenerator/fallback/attrdict/merge.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqsgenerator/fallback/attrdict/merge.py b/sqsgenerator/fallback/attrdict/merge.py
+new file mode 100755
+--- /dev/null	(date 1647244813845)
++++ b/sqsgenerator/fallback/attrdict/merge.py	(date 1647244813845)
+@@ -0,0 +1,48 @@
++
++"""
++A right-favoring Mapping merge.
++"""
++try:
++    from collections.abc import Mapping
++except ImportError:
++    from collections import Mapping
++
++
++__all__ = ['merge']
++
++
++def merge(left, right):
++    """
++    Merge two mappings objects together, combining overlapping Mappings,
++    and favoring right-values
++
++    left: The left Mapping object.
++    right: The right (favored) Mapping object.
++
++    NOTE: This is not commutative (merge(a,b) != merge(b,a)).
++    """
++    merged = {}
++
++    left_keys = frozenset(left)
++    right_keys = frozenset(right)
++
++    # Items only in the left Mapping
++    for key in left_keys - right_keys:
++        merged[key] = left[key]
++
++    # Items only in the right Mapping
++    for key in right_keys - left_keys:
++        merged[key] = right[key]
++
++    # in both
++    for key in left_keys & right_keys:
++        left_value = left[key]
++        right_value = right[key]
++
++        if (isinstance(left_value, Mapping) and
++                isinstance(right_value, Mapping)):  # recursive merge
++            merged[key] = merge(left_value, right_value)
++        else:  # overwrite with right value
++            merged[key] = right_value
++
++    return merged
+\ No newline at end of file
+Index: sqsgenerator/public.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqsgenerator/public.py b/sqsgenerator/public.py
+--- a/sqsgenerator/public.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
++++ b/sqsgenerator/public.py	(date 1647245221390)
+@@ -4,7 +4,7 @@
+ import itertools
+ import numpy as np
+ import typing as T
+-from attrdict import AttrDict
++from sqsgenerator.fallback.attrdict import AttrDict
+ from operator import attrgetter as attr, itemgetter as item
+ from sqsgenerator.io import read_settings_file, export_structures
+ from sqsgenerator.settings import construct_settings, process_settings, defaults
+Index: sqsgenerator/io.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqsgenerator/io.py b/sqsgenerator/io.py
+--- a/sqsgenerator/io.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
++++ b/sqsgenerator/io.py	(date 1647259876595)
+@@ -9,8 +9,8 @@
+ import functools
+ import numpy as np
+ import typing as T
+-from attrdict import AttrDict
+ from frozendict import frozendict
++from sqsgenerator.fallback.attrdict import AttrDict
+ from sqsgenerator.core import Structure, IterationMode
+ from sqsgenerator.compat import FeatureNotAvailableException
+ from operator import attrgetter as attr, methodcaller as method
+@@ -134,7 +134,8 @@
+     """
+     f = F(output_format)
+     if not have_feature(f):
+-        raise FeatureNotAvailableException(f'The package "{format}" is not installed, consider to install it with')
++        raise FeatureNotAvailableException(f'The package "{format}" is not installed, '
++                                           'consider to install it with')
+ 
+     # for yaml format we create a simple wrapper which captures the output
+     def safe_dumps(d, **kwargs):
+@@ -171,7 +172,8 @@
+         F.yaml: 'safe_load'
+     }
+     if not have_feature(f):
+-        raise FeatureNotAvailableException(f'The package "{format}" is not installed, consider to install it with')
++        raise FeatureNotAvailableException(f'The package "{format}" is not installed, '
++                                           'consider to install it with')
+     reader = getattr(get_module(f), readers[f])
+     try:
+         mode = 'r' if f != F.pickle else 'rb'
+@@ -250,7 +252,7 @@
+     reader = settings.structure.get('reader', 'ase')
+     available_readers = set(map(attr('value'), known_adapters))
+     if reader not in available_readers:
+-        raise FeatureNotAvailableException(f'Unknown reader specification "{reader}". '
++        raise FeatureNotAvailableException(f'Unknown reader specification "{reader}.  '
+                                            f'Available readers are {known_adapters}')
+     reader_kwargs = settings.structure.get('args', {})
+     reader_funcs = dict(ase=read_structure_file_with_ase, pymatgen=read_structure_file_with_pymatgen)
+Index: sqsgenerator/fallback/attrdict/dictionary.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqsgenerator/fallback/attrdict/dictionary.py b/sqsgenerator/fallback/attrdict/dictionary.py
+new file mode 100755
+--- /dev/null	(date 1647244531834)
++++ b/sqsgenerator/fallback/attrdict/dictionary.py	(date 1647244531834)
+@@ -0,0 +1,59 @@
++"""
++A dict that implements MutableAttr.
++"""
++
++import six
++from sqsgenerator.fallback.attrdict.mixins import MutableAttr
++
++__all__ = ['AttrDict']
++
++
++class AttrDict(dict, MutableAttr):
++    """
++    A dict that implements MutableAttr.
++    """
++    def __init__(self, *args, **kwargs):
++        super(AttrDict, self).__init__(*args, **kwargs)
++
++        self._setattr('_sequence_type', tuple)
++        self._setattr('_allow_invalid_attributes', False)
++
++    def _configuration(self):
++        """
++        The configuration for an attrmap instance.
++        """
++        return self._sequence_type
++
++    def __getstate__(self):
++        """
++        Serialize the object.
++        """
++        return (
++            self.copy(),
++            self._sequence_type,
++            self._allow_invalid_attributes
++        )
++
++    def __setstate__(self, state):
++        """
++        Deserialize the object.
++        """
++        mapping, sequence_type, allow_invalid_attributes = state
++        self.update(mapping)
++        self._setattr('_sequence_type', sequence_type)
++        self._setattr('_allow_invalid_attributes', allow_invalid_attributes)
++
++    def __repr__(self):
++        return six.u('AttrDict({contents})').format(
++            contents=super(AttrDict, self).__repr__()
++        )
++
++    @classmethod
++    def _constructor(cls, mapping, configuration):
++        """
++        A standardized constructor.
++        """
++        attr = cls(mapping)
++        attr._setattr('_sequence_type', configuration)
++
++        return attr
+Index: sqsgenerator/core/structure.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqsgenerator/core/structure.py b/sqsgenerator/core/structure.py
+--- a/sqsgenerator/core/structure.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
++++ b/sqsgenerator/core/structure.py	(date 1647253594373)
+@@ -98,10 +98,10 @@
+         def group_symbols():
+             for species, same in itertools.groupby(self._symbols):
+                 num_same = len(list(same))
+-                yield species if num_same == 1 else f'{species}{num_same}'
++                yield species if num_same == 1 else '{}{}'.format(species, num_same)
+ 
+         formula = ''.join(group_symbols())
+-        return f'Structure({formula}, len={self.num_atoms})'
++        return 'Structure({}, len={})'.format(formula, self.num_atoms)
+ 
+     def __eq__(self, other):
+         if not isinstance(other, Structure):
+@@ -139,7 +139,7 @@
+         elif isinstance(item, slice):
+             indices = np.arange(self.num_atoms)[item]
+         else:
+-            raise TypeError(f'Structure indices must not be of type {type(item)}')
++            raise TypeError('Structure indices must not be of type {}'.format(type(item)))
+         return Structure(self.lattice, self.frac_coords[indices], self.symbols[indices])
+ 
+     def to_dict(self) -> dict:
+Index: sqsgenerator/compat.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqsgenerator/compat.py b/sqsgenerator/compat.py
+--- a/sqsgenerator/compat.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
++++ b/sqsgenerator/compat.py	(date 1647259876480)
+@@ -54,13 +54,13 @@
+             getter = functools.partial(operator.itemgetter(feat.value), __features)
+             setattr(self_module, f'have_{feat.value}', getter)
+             message = f'Feature "{feat.value}" was ' + ('found' if __features[feat.value] else 'not found')
+-            logging.getLogger(f'compat.check_features').info(message)
++            logging.getLogger('compat.check_features').info(message)
+ 
+ 
+ def have_feature(feature: T.Union[Feature, str]) -> bool:
+     assert is_initialized()
+-    freature_value = feature.value if isinstance(feature, Feature) else feature
+-    return freature_value in __features and __features[freature_value]
++    feature_value = feature.value if isinstance(feature, Feature) else feature
++    return feature_value in __features and __features[feature_value]
+ 
+ 
+ def require(*features: Feature, condition=all):
+@@ -70,8 +70,11 @@
+ 
+         @functools.wraps(f)
+         def _wrapper(*args, **kwargs):
+-            if not condition(map(have_feature, features)): raise FeatureNotAvailableException(features)
++            if not condition(map(have_feature, features)):
++                raise FeatureNotAvailableException(features)
++
+             return f(*args, **kwargs)
++
+         return _wrapper
+ 
+     return _decorator
+@@ -87,7 +90,9 @@
+ 
+ 
+ def available_features_with_version():
+-    default_version = lambda _ : ''
++
++    def default_version(*_):
++        return ''
+ 
+     def module_version_attr(f):
+         feature = Feature(f)
+Index: sqsgenerator/cli.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqsgenerator/cli.py b/sqsgenerator/cli.py
+--- a/sqsgenerator/cli.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
++++ b/sqsgenerator/cli.py	(date 1647260126796)
+@@ -12,12 +12,12 @@
+ 
+ def make_version_string():
+     major, minor, *_ = __version__
+-    return f'{major}.{minor}'
++    return '%i.%i' % (major, minor)
+ 
+ 
+ def make_repo_status():
+     _, _, commit, branch = __version__
+-    return f'{commit}@{branch}'
++    return '%s@%s' % (commit, branch)
+ 
+ 
+ _title = '[bold]sqsgenerator[/bold] - A CLI tool to find optimized SQS structures'
+Index: setup.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/setup.py b/setup.py
+--- a/setup.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
++++ b/setup.py	(date 1647257109244)
+@@ -63,20 +63,20 @@
+             extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
+             cfg = 'Debug' if ext.debug else 'Release'
+             cmake_args = [
+-                f'-DCMAKE_BUILD_TYPE={cfg}',
++                '-DCMAKE_BUILD_TYPE={}'.format(cfg),
+                 # Ask CMake to place the resulting library in the directory
+                 # containing the extension
+-                f'-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{cfg.upper()}={extdir}',
++                '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}'.format(cfg.upper(), extdir),
+                 # Other intermediate static libraries are placed in a
+                 # temporary build directory instead
+-                f'-DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_{cfg.upper()}={self.build_temp}',
++                '-DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_{}={}'.format(cfg.upper(), self.build_temp),
+                 # Hint CMake to use the same Python executable that
+                 # is launching the build, prevents possible mismatching if
+                 # multiple versions of Python are installed
+                 '-DPython3_EXECUTABLE={}'.format(sys.executable),
+                 # Add other project-specific CMake arguments if needed
+                 # ...
+-                f'-DUSE_MPI={"ON" if self.with_mpi else "OFF"}',
++                '-DUSE_MPI={}'.format("ON" if self.with_mpi else "OFF"),
+                 # '-DCMAKE_CXX_FLAGS_{}={}'.format(cfg.upper(),  )
+             ]
+             cmake_cxx_flags = ' '.join(opt_flags.get(cfg, {}).get(self.compiler.compiler_type, []))
+@@ -86,13 +86,13 @@
+             for env_var_name, env_var_value in os.environ.items():
+                 if env_var_name == 'CMAKE_CXX_FLAGS':
+                     # we append them to our release/debug flags
+-                    cmake_cxx_flags += f' {env_var_value}'
++                    cmake_cxx_flags += ' {}'.format(env_var_value)
+                 elif env_var_name.startswith('CMAKE'):
+-                    cmake_args.append(f'-D{env_var_name}={env_var_value}')
+-                m = re.match(f'{env_var_prefix}(?P<varname>\w+)', env_var_name)
++                    cmake_args.append('-D{}={}'.format(env_var_name, env_var_value))
++                m = re.match('{}(?P<varname>\w+)'.format(env_var_prefix), env_var_name)
+                 if m:
+                     env_var_name_real = m.groupdict()['varname']
+-                    cmake_args.append(f'-D{env_var_name_real}={env_var_value}')
++                    cmake_args.append('-D{}={}'.format(env_var_name_real, env_var_value))
+ 
+             cmake_args.append('-DCMAKE_CXX_FLAGS_{}={}'.format(cfg.upper(), cmake_cxx_flags))
+             pprint.pprint(cmake_args)
+@@ -107,7 +107,7 @@
+                 # Assuming that Visual Studio and MinGW are supported compilers
+                 if self.compiler.compiler_type == 'msvc':
+                     cmake_args += [
+-                        f'-DCMAKE_GENERATOR_PLATFORM={plat}'
++                        '-DCMAKE_GENERATOR_PLATFORM={}'.format(plat)
+                     ]
+                 else:
+                     cmake_args += [
+@@ -143,7 +143,7 @@
+         'build_ext': CMakeBuildExt,
+         'install': InstallCustom
+     },
+-    install_requires=['attrdict', 'numpy', 'click', 'rich>=9.11.0', 'pyyaml', 'frozendict'],
++    install_requires=['numpy', 'click', 'rich>=9.11.0', 'pyyaml', 'frozendict'],
+     entry_points={
+         'console_scripts': ['sqsgen=sqsgenerator.cli:cli']
+     },
+Index: sqsgenerator/core/src/sqs.cpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqsgenerator/core/src/sqs.cpp b/sqsgenerator/core/src/sqs.cpp
+--- a/sqsgenerator/core/src/sqs.cpp	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
++++ b/sqsgenerator/core/src/sqs.cpp	(date 1647084580930)
+@@ -122,8 +122,9 @@
+ 
+     std::vector<size_t> convert_pair_list(const std::vector<AtomPair> &pair_list) {
+         std::vector<size_t> result;
++        pair_shell_matrix_t::index i, j, _, shell_index;
+         for (const auto &pair : pair_list) {
+-            auto[i, j, _, shell_index] = pair;
++            std::tie(i, j, _, shell_index) = pair;
+             result.push_back(i);
+             result.push_back(j);
+             result.push_back(shell_index);
+@@ -277,7 +278,8 @@
+                 iteration_ranks = compute_ranks(settings, threads_per_rank);
+             }
+             #pragma omp barrier
+-            auto [start_it, end_it] = iteration_ranks[mpi_rank][thread_id];
++            rank_t start_it, end_it;
++            std::tie(start_it, end_it) = iteration_ranks[mpi_rank][thread_id];
+             #pragma omp critical
+             {
+                 BOOST_LOG_TRIVIAL(debug) << "do_pair_iterations::rank::" << mpi_rank << "::thread::" << thread_id << "::iteration_start = " << start_it;
+Index: sqsgenerator/fallback/attrdict/__init__.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqsgenerator/fallback/attrdict/__init__.py b/sqsgenerator/fallback/attrdict/__init__.py
+new file mode 100755
+--- /dev/null	(date 1647244531724)
++++ b/sqsgenerator/fallback/attrdict/__init__.py	(date 1647244531724)
+@@ -0,0 +1,7 @@
++"""
++attrdict contains several mapping objects that allow access to their
++keys as attributes.
++"""
++from sqsgenerator.fallback.attrdict.dictionary import AttrDict
++
++__all__ = ['AttrDict']
+Index: sqsgenerator/fallback/__init__.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqsgenerator/fallback/__init__.py b/sqsgenerator/fallback/__init__.py
+new file mode 100755
+--- /dev/null	(date 1647251154904)
++++ b/sqsgenerator/fallback/__init__.py	(date 1647251154904)
+@@ -0,0 +1,2 @@
++
++from sqsgenerator.fallback import attrdict
+\ No newline at end of file
+Index: sqsgenerator/core/include/structure_utils.hpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqsgenerator/core/include/structure_utils.hpp b/sqsgenerator/core/include/structure_utils.hpp
+--- a/sqsgenerator/core/include/structure_utils.hpp	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
++++ b/sqsgenerator/core/include/structure_utils.hpp	(date 1647083609903)
+@@ -8,6 +8,7 @@
+ 
+ #include "types.hpp"
+ #include "utils.hpp"
++#include <set>
+ #include <vector>
+ #include <limits>
+ #include <algorithm>
+Index: sqsgenerator/core/include/utils.hpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqsgenerator/core/include/utils.hpp b/sqsgenerator/core/include/utils.hpp
+--- a/sqsgenerator/core/include/utils.hpp	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
++++ b/sqsgenerator/core/include/utils.hpp	(date 1647083609906)
+@@ -6,6 +6,7 @@
+ #define SQSGENERATOR_UTILS_HPP
+ 
+ #include "types.hpp"
++#include <set>
+ #include <sstream>
+ #include <stdexcept>
+ #include <boost/multi_array.hpp>
+Index: sqsgenerator/core/include/types.hpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqsgenerator/core/include/types.hpp b/sqsgenerator/core/include/types.hpp
+--- a/sqsgenerator/core/include/types.hpp	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
++++ b/sqsgenerator/core/include/types.hpp	(date 1647084580929)
+@@ -54,7 +54,7 @@
+     using Shape = std::array<size_t, NDims>;
+ 
+     // The array consists of {size_t i, size_t j, size_t shell, size_t shell_index}
+-    typedef std::array<pair_shell_matrix_t::index, 4> AtomPair;
++    typedef std::tuple<pair_shell_matrix_t::index, pair_shell_matrix_t::index, pair_shell_matrix_t::index, pair_shell_matrix_t::index> AtomPair;
+ 
+     constexpr species_t ALL_SITES = -1;
+ }
+Index: sqsgenerator/commands/help.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqsgenerator/commands/help.py b/sqsgenerator/commands/help.py
+--- a/sqsgenerator/commands/help.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
++++ b/sqsgenerator/commands/help.py	(date 1647259370373)
+@@ -2,8 +2,8 @@
+ A data file storing the CLI's help strings
+ """
+ 
+-from attrdict import AttrDict
+ from sqsgenerator.io import default_adapter
++from sqsgenerator.fallback.attrdict import AttrDict
+ 
+ 
+ command_help = AttrDict(dict(
+Index: sqsgenerator/commands/common.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqsgenerator/commands/common.py b/sqsgenerator/commands/common.py
+--- a/sqsgenerator/commands/common.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
++++ b/sqsgenerator/commands/common.py	(date 1647259136548)
+@@ -78,7 +78,7 @@
+ 
+ def exit_on_input_parameter_error(f):
+     """
+-    Decorator: Wraps a @parameter decorated function -> catches a eventual `BadSettings` error -> creates a help-link
++    Decorator: Wraps a @parameter decorated function -> catches an eventual `BadSettings` error -> creates a help-link
+     for the parameter -> redirects the `BadSettings` into `click.Abort` to stop CLI execution
+     """
+ 
+@@ -100,7 +100,7 @@
+ 
+ def click_settings_file(process=None, default_name='sqs.yaml', ignore=()):
+     """
+-    Decorator-Factory: A lot of the commands need an input YAML file -> creates a a decorator which parses a settings
++    Decorator-Factory: A lot of the commands need an input YAML file -> creates a decorator which parses a settings
+     file and takes an input format as parameter. The decorator processes the specified file
+     :param process: process (parsed) the settings dictionary with sqsgenerator.core (default is `None`)
+     :type process: Iterable[str] or None
+Index: test/cli/test_command_run.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/test/cli/test_command_run.py b/test/cli/test_command_run.py
+--- a/test/cli/test_command_run.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
++++ b/test/cli/test_command_run.py	(date 1647260010067)
+@@ -46,7 +46,7 @@
+         for compression in compression_to_file_extension.keys():
+ 
+             r = self.cli_runner.invoke(cli, ['run', 'iteration', '--export', '--no-minimal', '--similar', '--compress', compression])
+-            archive_name = f'sqs.{compression_to_file_extension.get(compression)}'
++            archive_name = 'sqs.{}'.format(compression_to_file_extension.get(compression))
+ 
+             if r.exit_code != 0:
+                 print(r.output, r.exit_code, r.stderr)
+@@ -57,7 +57,8 @@
+     @inject_config_file()
+     def test_analyse_command(self):
+         result_file = 'sqs.result.yaml'
+-        r = self.cli_runner.invoke(cli, ['run', 'iteration', '--export', '--no-minimal', '--similar', '--dump-include', 'parameters', '--dump-include', 'objective'])
++        r = self.cli_runner.invoke(cli, ['run', 'iteration', '--export', '--no-minimal', '--similar', '--dump-include',
++                                         'parameters', '--dump-include', 'objective'])
+         self.assertTrue(os.path.exists(result_file))
+         self.assertEqual(r.exit_code, 0)
+ 
+@@ -77,7 +78,7 @@
+ 
+         for k in results_from_analyse.keys():
+             iteration, analyse = results_from_iteration[k], results_from_analyse[k]
+-            # self.assertAlmostEqual(iteration['objective'], analyse['objective'])
++
+             self.assertListEqual(iteration['configuration'], analyse['configuration'])
+             np.testing.assert_array_almost_equal(iteration['parameters'], analyse['parameters'])
+ 
