@@ -26,7 +26,7 @@ requirements:
     - make
     - cmake
     - numpy
-    - pytthon
+    - python
     - py-boost
     - libboost
     - llvm-openmp  # [osx]
