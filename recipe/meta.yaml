@@ -13,7 +13,7 @@ source:
 
 
 build:
-  number: 0
+  number: 1
   script_env:
     - SQS_Boost_USE_STATIC_LIBS=ON
     - SQS_CMAKE_CXX_FLAGS="-static-libstdc++"
