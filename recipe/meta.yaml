@@ -13,7 +13,10 @@ source:
 
 
 build:
-  number: 2
+  number: 0
+  script_env:
+    - SQS_Boost_USE_STATIC_LIBS=ON
+    - SQS_CMAKE_CXX_FLAGS="-static-libstdc++"
   script: {{ PYTHON }} -m pip install . -vv
   skip: true  # [win or py<35]
 
@@ -22,30 +25,29 @@ requirements:
     - pip 
     - make
     - cmake
-    - boost
-    - boost-cpp
     - numpy
+    - pytthon
+    - py-boost
+    - libboost
     - llvm-openmp  # [osx]
     - libgomp      # [linux]
     - {{ compiler('cxx') }}
     - cross-python_{{ target_platform }}     # [build_platform != target_platform]
   host:
     - pip 
-    - python
     - numpy
-    - boost
-    - boost-cpp 
+    - python
+    - py-boost
+    - libboost
     - llvm-openmp  # [osx]
     - libgomp      # [linux]
   run:
     - pip 
     - rich
+    - numpy
     - click
     - python
-    - boost
-    - boost-cpp
     - pyyaml
-    - attrdict
     - frozendict
     - llvm-openmp  # [osx]
     - libgomp      # [linux]
