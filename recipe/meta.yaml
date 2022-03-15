@@ -11,45 +11,48 @@ source:
   patches:
     - clang.patch
 
-
 build:
-  number: 2
+  number: 3
   script: {{ PYTHON }} -m pip install . -vv
   skip: true  # [win or py<35]
 
 requirements:
   build:
-    - pip 
+    - pip
+    - six
     - make
     - cmake
+    - numpy
+    - python
     - boost
     - boost-cpp
-    - numpy
     - llvm-openmp  # [osx]
     - libgomp      # [linux]
     - {{ compiler('cxx') }}
     - cross-python_{{ target_platform }}     # [build_platform != target_platform]
   host:
-    - pip 
-    - python
+    - pip
+    - six
     - numpy
-    - boost
-    - boost-cpp 
-    - llvm-openmp  # [osx]
-    - libgomp      # [linux]
-  run:
-    - pip 
-    - rich
-    - click
     - python
     - boost
     - boost-cpp
+    - llvm-openmp  # [osx]
+    - libgomp      # [linux]
+  run:
+    - pip
+    - six
+    - rich
+    - numpy
+    - click
+    - python
     - pyyaml
-    - attrdict
     - frozendict
     - llvm-openmp  # [osx]
     - libgomp      # [linux]
     - {{ pin_compatible('numpy') }}
+    - {{ pin_compatible('boost') }}
+    - {{ pin_compatible('boost-cpp') }}
 
 test:
   imports:
