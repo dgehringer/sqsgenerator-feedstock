@@ -11,12 +11,8 @@ source:
   patches:
     - clang.patch
 
-
 build:
   number: 3
-  script_env:
-    - SQS_Boost_USE_STATIC_LIBS=ON
-    - SQS_CMAKE_CXX_FLAGS="-static-libstdc++"
   script: {{ PYTHON }} -m pip install . -vv
   skip: true  # [win or py<35]
 
@@ -28,8 +24,8 @@ requirements:
     - cmake
     - numpy
     - python
-    - py-boost
-    - libboost
+    - boost
+    - boost-cpp
     - llvm-openmp  # [osx]
     - libgomp      # [linux]
     - {{ compiler('cxx') }}
@@ -39,8 +35,8 @@ requirements:
     - six
     - numpy
     - python
-    - py-boost
-    - libboost
+    - boost
+    - boost-cpp
     - llvm-openmp  # [osx]
     - libgomp      # [linux]
   run:
@@ -55,6 +51,8 @@ requirements:
     - llvm-openmp  # [osx]
     - libgomp      # [linux]
     - {{ pin_compatible('numpy') }}
+    - {{ pin_compatible('boost') }}
+    - {{ pin_compatible('boost-cpp') }}
 
 test:
   imports:
