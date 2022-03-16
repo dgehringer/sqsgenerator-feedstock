@@ -13,22 +13,31 @@ source:
     - clang.patch
 
 build:
-  number: 4
+  number: 5
+  script_env:
+    - SQS_CMAKE_C_COMPILER=clang-cl    # [win]
+    - SQS_CMAKE_CXX_COMPILER=clang-cl  # [win]
+    - SQS_CMAKE_LINKER=lld-link        # [win] 
+    - SQS_CMAKE_NM=llvm-nm             # [win]
+    - SQS_CMAKE_VERBOSE_MAKEFILE=ON    # [win]
   script: {{ PYTHON }} -m pip install . -vv
-  skip: true  # [win or py<35]
+  skip: true  # [py<35]
 
 requirements:
   build:
     - pip
     - six
-    - make
-    - cmake
+    - lld            # [win]
+    - make           # [unix]
+    - cmake >=3.12.0
+    - clang          # [win]
+    - ninja          # [win]
     - numpy
     - python
     - boost
     - boost-cpp
-    - llvm-openmp  # [osx]
-    - libgomp      # [linux]
+    - llvm-openmp    # [osx or win]
+    - libgomp        # [linux]
     - {{ compiler('cxx') }}
     - cross-python_{{ target_platform }}     # [build_platform != target_platform]
   host:
