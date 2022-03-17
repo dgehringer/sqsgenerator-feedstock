@@ -15,12 +15,12 @@ source:
 build:
   number: 5
   script_env:
-    - SQS_CMAKE_GENERATOR_INSTANCE=x64 # [win]
-    - SQS_CMAKE_C_COMPILER=clang-cl    # [win]
+    - SQS_CMAKE_GENERATOR_INSTANCE=x64  # [win]
+    - SQS_CMAKE_C_COMPILER=clang-cl  # [win]
     - SQS_CMAKE_CXX_COMPILER=clang-cl  # [win]
-    - SQS_CMAKE_LINKER=lld-link        # [win] 
-    - SQS_CMAKE_NM=llvm-nm             # [win]
-    - SQS_CMAKE_VERBOSE_MAKEFILE=ON    # [win]
+    - SQS_CMAKE_LINKER=lld-link  # [win]
+    - SQS_CMAKE_NM=llvm-nm  # [win]
+    - SQS_CMAKE_VERBOSE_MAKEFILE=ON  # [win]
   script: {{ PYTHON }} -m pip install . -vv
   skip: true  # [py<35]
 
