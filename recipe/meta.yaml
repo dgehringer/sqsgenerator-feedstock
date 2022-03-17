@@ -15,7 +15,7 @@ source:
 build:
   number: 5
   script_env:
-    - SQS_CMAKE_GENERATOR_INSTANCE=x64  # [win]
+    - SQS_CMAKE_GENERATOR_INSTANCE=Win64  # [win]
     - SQS_CMAKE_C_COMPILER=clang-cl  # [win]
     - SQS_CMAKE_CXX_COMPILER=clang-cl  # [win]
     - SQS_CMAKE_LINKER=lld-link  # [win]
