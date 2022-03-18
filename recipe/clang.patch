@@ -516,7 +516,7 @@ index 99e4920..278876e 100644
  #include "types.hpp"
  #include "sqs.hpp"
 diff --git a/sqsgenerator/core/src/sqs.cpp b/sqsgenerator/core/src/sqs.cpp
-index 3261d81..cd8440a 100644
+index 3261d81..db8b401 100644
 --- a/sqsgenerator/core/src/sqs.cpp
 +++ b/sqsgenerator/core/src/sqs.cpp
 @@ -14,7 +14,6 @@
@@ -612,8 +612,8 @@ index 3261d81..cd8440a 100644
          // Restore the the old sigaction handler
 -        sigaction(SIGINT, &old_sigint_handler, NULL);
 +        #if defined(_WIN32) || defined(_WIN64)
-+            signal(SIGINT, &old_sigint_handler);
-+            signal(SIGABRT, &old_sigabrt_handler);
++            signal(SIGINT, old_sigint_handler);
++            signal(SIGABRT, old_sigabrt_handler);
 +        #else
 +            sigaction(SIGINT, &old_sigint_handler, NULL);
 +        #endif
@@ -622,7 +622,7 @@ index 3261d81..cd8440a 100644
          // For the MPI-version we also have to restore the SIGTERM handler
 -        sigaction(SIGTERM, &old_sigterm_handler, NULL);
 +        #if defined(_WIN32) || defined(_WIN64)
-+            signal(SIGTERM, &old_sigterm_handler);
++            signal(SIGTERM, old_sigterm_handler);
 +        #else
 +            sigaction(SIGTERM, &old_sigterm_handler, NULL);
 +        #endif
