@@ -1,18 +1,14 @@
-Index: setup.py
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
 diff --git a/setup.py b/setup.py
---- a/setup.py	(revision a98bf1e65a91fd0b9c2c21032794e3133709e0c8)
-+++ b/setup.py	(date 1647340856795)
+index a1e5d6e..cb2f480 100644
+--- a/setup.py
++++ b/setup.py
 @@ -1,4 +1,4 @@
 -import re
 +
  import re
  import os
  import sys
-@@ -13,7 +13,7 @@
+@@ -13,7 +13,7 @@ WITH_MPI = False
  
  opt_flags = {
      'Release': {
@@ -21,3 +17,68 @@ diff --git a/setup.py b/setup.py
      },
      'Debug': {
          'unix': ['-g']
+@@ -73,16 +73,16 @@ class CMakeBuildExt(build_ext):
+                 # Hint CMake to use the same Python executable that
+                 # is launching the build, prevents possible mismatching if
+                 # multiple versions of Python are installed
+-                '-DPython3_EXECUTABLE={}'.format(sys.executable),
++                f'-DPython3_EXECUTABLE={sys.executable}',
+                 # Add other project-specific CMake arguments if needed
+                 # ...
+-                f'-DUSE_MPI={"ON" if self.with_mpi else "OFF"}',
++                '-DUSE_MPI={}'.format("ON" if self.with_mpi else "OFF"),
+                 # '-DCMAKE_CXX_FLAGS_{}={}'.format(cfg.upper(),  )
+             ]
+             cmake_cxx_flags = ' '.join(opt_flags.get(cfg, {}).get(self.compiler.compiler_type, []))
+ 
+             env_var_prefix = 'SQS_'
+-            # we allow to overload cmake compiler options
++            # we allow overloading cmake compiler options
+             for env_var_name, env_var_value in os.environ.items():
+                 if env_var_name == 'CMAKE_CXX_FLAGS':
+                     # we append them to our release/debug flags
+@@ -94,20 +94,22 @@ class CMakeBuildExt(build_ext):
+                     env_var_name_real = m.groupdict()['varname']
+                     cmake_args.append(f'-D{env_var_name_real}={env_var_value}')
+ 
+-            cmake_args.append('-DCMAKE_CXX_FLAGS_{}={}'.format(cfg.upper(), cmake_cxx_flags))
++            cmake_args.append(f'-DCMAKE_CXX_FLAGS_{cfg.upper()}={cmake_cxx_flags}')
+             pprint.pprint(cmake_args)
+             # We can handle some platform-specific settings at our discretion
+             if platform.system() == 'Windows':
+-                plat = ('x64' if platform.architecture()[0] == '64bit' else 'Win32')
++                print('sqsgenerator.setup.py -> configuring CMake for Windows')
++                # plat = ('x64' if platform.architecture()[0] == '64bit' else 'Win32')
+                 cmake_args += [
+                     # These options are likely to be needed under Windows
+                     '-DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE',
+-                    '-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_{}={}'.format(cfg.upper(), extdir),
++                    # f'-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_{cfg.upper()}={extdir}'
+                 ]
+                 # Assuming that Visual Studio and MinGW are supported compilers
+                 if self.compiler.compiler_type == 'msvc':
+                     cmake_args += [
+-                        f'-DCMAKE_GENERATOR_PLATFORM={plat}'
++                        # f'-DCMAKE_GENERATOR_PLATFORM={plat}',
++                        '-G', 'Ninja'
+                     ]
+                 else:
+                     cmake_args += [
+@@ -129,7 +131,7 @@ class CMakeBuildExt(build_ext):
+         """finalize options"""
+         super(CMakeBuildExt, self).finalize_options()
+ 
+-        
++
+ setup(
+     name='sqsgenerator',
+     version='0.1',
+@@ -143,7 +145,7 @@ setup(
+         'build_ext': CMakeBuildExt,
+         'install': InstallCustom
+     },
+-    install_requires=['attrdict', 'numpy', 'click', 'rich>=9.11.0', 'pyyaml', 'frozendict'],
++    install_requires=['numpy', 'click', 'rich>=9.11.0', 'pyyaml', 'frozendict'],
+     entry_points={
+         'console_scripts': ['sqsgen=sqsgenerator.cli:cli']
+     },
