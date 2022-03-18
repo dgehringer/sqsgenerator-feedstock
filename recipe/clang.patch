@@ -448,16 +448,10 @@ index 1766978..4ac163f 100644
      def module_version_attr(f):
          feature = Feature(f)
 diff --git a/sqsgenerator/core/include/structure_utils.hpp b/sqsgenerator/core/include/structure_utils.hpp
-index af44148..5728d97 100644
+index af44148..9c82293 100644
 --- a/sqsgenerator/core/include/structure_utils.hpp
 +++ b/sqsgenerator/core/include/structure_utils.hpp
-@@ -5,9 +5,13 @@
- #ifndef SQSGENERATOR_STRUCTURE_UTILS_HPP
- #define SQSGENERATOR_STRUCTURE_UTILS_HPP
- 
-+#ifdef _WIN32
-+#define snprintf _snprintf
-+#endif
+@@ -8,6 +8,7 @@
  
  #include "types.hpp"
  #include "utils.hpp"
@@ -504,38 +498,27 @@ index fd636d4..9fc1ffe 100644
              V val = py::extract<V>(d[key]);
              result.emplace(std::make_pair(key, val));
 diff --git a/sqsgenerator/core/python/module_core.cpp b/sqsgenerator/core/python/module_core.cpp
-index 99e4920..01a0962 100644
+index 99e4920..32b9aba 100644
 --- a/sqsgenerator/core/python/module_core.cpp
 +++ b/sqsgenerator/core/python/module_core.cpp
-@@ -2,9 +2,10 @@
+@@ -1,10 +1,9 @@
+ //
  // Created by dominik on 02.09.21.
  //
++#if defined(_MSC_VER) && _MSC_VER < 1500 // VC++ 8.0 and below
++#define snprintf _snprintf
  
 -//
 -// Created by dominik on 14.07.21.
 -//
-+#ifdef _WIN32
-+#define snprintf _snprintf
-+#endif
-+
  #include "version.hpp"
  #include "types.hpp"
  #include "sqs.hpp"
 diff --git a/sqsgenerator/core/src/sqs.cpp b/sqsgenerator/core/src/sqs.cpp
-index 3261d81..8113b77 100644
+index 3261d81..1a87ebd 100644
 --- a/sqsgenerator/core/src/sqs.cpp
 +++ b/sqsgenerator/core/src/sqs.cpp
-@@ -1,6 +1,9 @@
- //
- // Created by dominik on 14.07.21.
- //
-+#ifdef _WIN32
-+#define snprintf _snprintf
-+#endif
- 
- #include "sqs.hpp"
- #if defined(_OPENMP)
-@@ -14,7 +17,6 @@
+@@ -14,7 +14,6 @@
  #endif
  #include <atomic>
  #include <chrono>
@@ -543,7 +526,7 @@ index 3261d81..8113b77 100644
  #include <signal.h>
  #include <unordered_set>
  #include <boost/circular_buffer.hpp>
-@@ -122,8 +124,9 @@ namespace sqsgenerator {
+@@ -122,8 +121,9 @@ namespace sqsgenerator {
  
      std::vector<size_t> convert_pair_list(const std::vector<AtomPair> &pair_list) {
          std::vector<size_t> result;
@@ -554,7 +537,7 @@ index 3261d81..8113b77 100644
              result.push_back(i);
              result.push_back(j);
              result.push_back(shell_index);
-@@ -277,7 +280,8 @@ namespace sqsgenerator {
+@@ -277,7 +277,8 @@ namespace sqsgenerator {
                  iteration_ranks = compute_ranks(settings, threads_per_rank);
              }
              #pragma omp barrier
