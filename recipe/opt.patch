@@ -21,3 +21,32 @@ diff --git a/setup.py b/setup.py
      },
      'Debug': {
          'unix': ['-g']
+Index: setup.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/setup.py b/setup.py
+--- a/setup.py	(revision 20bc01c44a66367e6a9cdcdad18e0cc650894992)
++++ b/setup.py	(date 1647589569550)
+@@ -98,16 +98,18 @@
+             pprint.pprint(cmake_args)
+             # We can handle some platform-specific settings at our discretion
+             if platform.system() == 'Windows':
++                print('sqsgenerator.setup.py -> configuring CMake for Windows')
+                 plat = ('x64' if platform.architecture()[0] == '64bit' else 'Win32')
+                 cmake_args += [
+                     # These options are likely to be needed under Windows
+                     '-DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE',
+-                    f'-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_{cfg.upper()}={extdir}'
++                    # f'-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_{cfg.upper()}={extdir}'
+                 ]
+                 # Assuming that Visual Studio and MinGW are supported compilers
+                 if self.compiler.compiler_type == 'msvc':
+                     cmake_args += [
+-                        f'-DCMAKE_GENERATOR_PLATFORM={plat}'
++                        # f'-DCMAKE_GENERATOR_PLATFORM={plat}',
++                        '-G', 'Ninja'
+                     ]
+                 else:
+                     cmake_args += [
