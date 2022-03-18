@@ -516,7 +516,7 @@ index 99e4920..278876e 100644
  #include "types.hpp"
  #include "sqs.hpp"
 diff --git a/sqsgenerator/core/src/sqs.cpp b/sqsgenerator/core/src/sqs.cpp
-index 3261d81..1a87ebd 100644
+index 3261d81..cd8440a 100644
 --- a/sqsgenerator/core/src/sqs.cpp
 +++ b/sqsgenerator/core/src/sqs.cpp
 @@ -14,7 +14,6 @@
@@ -538,7 +538,65 @@ index 3261d81..1a87ebd 100644
              result.push_back(i);
              result.push_back(j);
              result.push_back(shell_index);
-@@ -277,7 +277,8 @@ namespace sqsgenerator {
+@@ -145,19 +145,26 @@ namespace sqsgenerator {
+ #endif
+ 
+     std::tuple<std::vector<SQSResult>, timing_map_t> do_pair_iterations(const IterationSettings &settings) {
+-        typedef boost::circular_buffer<SQSResult> result_buffer_t; // this typedef is an implementation detail and used just in this method
+-        auto threads_per_rank {settings.threads_per_rank()};
+-
+-        // setup the signal handler
++    typedef boost::circular_buffer<SQSResult> result_buffer_t; // this typedef is an implementation detail and used just in this method
++    auto threads_per_rank {settings.threads_per_rank()};
++
++    // setup the signal handler
++#if defined(_WIN32) || defined(_WIN64)
++    typedef void (*signal_handler_ptr)(int);
++    signal_handler_ptr old_sigint_handler, old_sigabrt_handler;
++    old_sigint_handler = signal(SIGINT, handle_signal_sigint);
++    old_sigabrt_handler = signal(SIGABRT, handle_signal_sigint);
++#else
++    struct sigaction old_sigint_handler;
++    {
++        struct sigaction new_sigint_handler;
++        new_sigint_handler.sa_handler = handle_signal_sigint;
++        sigemptyset(&new_sigint_handler.sa_mask);
++        new_sigint_handler.sa_flags = 0x0;
++        sigaction(SIGINT, &new_sigint_handler, &old_sigint_handler);
++    }
++#endif
+ 
+-        struct sigaction old_sigint_handler;
+-        {
+-            struct sigaction new_sigint_handler;
+-            new_sigint_handler.sa_handler = handle_signal_sigint;
+-            sigemptyset(&new_sigint_handler.sa_mask);
+-            new_sigint_handler.sa_flags = 0x0;
+-            sigaction(SIGINT, &new_sigint_handler, &old_sigint_handler);
+-        }
+ #if defined(USE_MPI)
+         /*
+          * Upon hitting Ctrl+C Python has registered it's own signal handler which raises the Keyboard interrupt
+@@ -165,6 +172,10 @@ namespace sqsgenerator {
+          * "mpiexec" a SIGTERM is propagated to all child processes, therefore we also put a handler for this signal
+          * See: https://www.open-mpi.org/doc/v3.0/man1/mpirun.1.php#sect15
+          */
++    #if defined(_WIN32) || defined(_WIN64)
++        signal_handler_ptr old_sigterm_handler;
++        old_sigterm_handler = signal(SIGTERM, handle_signal_sigterm);
++    #else
+         struct sigaction old_sigterm_handler;
+         {
+             struct sigaction new_sigterm_handler;
+@@ -173,6 +184,7 @@ namespace sqsgenerator {
+             new_sigterm_handler.sa_flags = 0x0;
+             sigaction(SIGTERM, &new_sigterm_handler, &old_sigterm_handler);
+         }
++    #endif
+ #endif
+ 
+ #if defined(USE_MPI)
+@@ -277,7 +289,8 @@ namespace sqsgenerator {
                  iteration_ranks = compute_ranks(settings, threads_per_rank);
              }
              #pragma omp barrier
@@ -548,6 +606,29 @@ index 3261d81..1a87ebd 100644
              #pragma omp critical
              {
                  BOOST_LOG_TRIVIAL(debug) << "do_pair_iterations::rank::" << mpi_rank << "::thread::" << thread_id << "::iteration_start = " << start_it;
+@@ -401,11 +414,20 @@ namespace sqsgenerator {
+         } // pragma omp parallel
+ 
+         // Restore the the old sigaction handler
+-        sigaction(SIGINT, &old_sigint_handler, NULL);
++        #if defined(_WIN32) || defined(_WIN64)
++            signal(SIGINT, &old_sigint_handler);
++            signal(SIGABRT, &old_sigabrt_handler);
++        #else
++            sigaction(SIGINT, &old_sigint_handler, NULL);
++        #endif
+ 
+ #if defined(USE_MPI)
+         // For the MPI-version we also have to restore the SIGTERM handler
+-        sigaction(SIGTERM, &old_sigterm_handler, NULL);
++        #if defined(_WIN32) || defined(_WIN64)
++            signal(SIGTERM, &old_sigterm_handler);
++        #else
++            sigaction(SIGTERM, &old_sigterm_handler, NULL);
++        #endif
+ #endif
+ 
+         if ((do_shutdown && shutdown_requested.load())) {
 diff --git a/sqsgenerator/fallback/__init__.py b/sqsgenerator/fallback/__init__.py
 new file mode 100644
 index 0000000..fd9c056
