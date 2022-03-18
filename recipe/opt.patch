@@ -1,8 +1,3 @@
-Index: setup.py
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
 diff --git a/setup.py b/setup.py
 index a1e5d6e..cb2f480 100644
 --- a/setup.py
@@ -35,7 +30,7 @@ index a1e5d6e..cb2f480 100644
                  # '-DCMAKE_CXX_FLAGS_{}={}'.format(cfg.upper(),  )
              ]
              cmake_cxx_flags = ' '.join(opt_flags.get(cfg, {}).get(self.compiler.compiler_type, []))
-
+ 
              env_var_prefix = 'SQS_'
 -            # we allow to overload cmake compiler options
 +            # we allow overloading cmake compiler options
@@ -45,7 +40,7 @@ index a1e5d6e..cb2f480 100644
 @@ -94,20 +94,22 @@ class CMakeBuildExt(build_ext):
                      env_var_name_real = m.groupdict()['varname']
                      cmake_args.append(f'-D{env_var_name_real}={env_var_value}')
-
+ 
 -            cmake_args.append('-DCMAKE_CXX_FLAGS_{}={}'.format(cfg.upper(), cmake_cxx_flags))
 +            cmake_args.append(f'-DCMAKE_CXX_FLAGS_{cfg.upper()}={cmake_cxx_flags}')
              pprint.pprint(cmake_args)
@@ -72,8 +67,8 @@ index a1e5d6e..cb2f480 100644
 @@ -129,7 +131,7 @@ class CMakeBuildExt(build_ext):
          """finalize options"""
          super(CMakeBuildExt, self).finalize_options()
-
--
+ 
+-        
 +
  setup(
      name='sqsgenerator',
