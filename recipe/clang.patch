@@ -1081,4 +1081,21 @@ diff --git a/test/cli/test_command_run.py b/test/cli/test_command_run.py
 +
              self.assertListEqual(iteration['configuration'], analyse['configuration'])
              np.testing.assert_array_almost_equal(iteration['parameters'], analyse['parameters'])
- 
+
+Index: sqsgenerator/core/src/sqs.cpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sqsgenerator/core/src/sqs.cpp b/sqsgenerator/core/src/sqs.cpp
+index 306c34d..1a87ebd 100644
+--- a/sqsgenerator/core/src/sqs.cpp
++++ b/sqsgenerator/core/src/sqs.cpp
+@@ -14,7 +14,6 @@
+ #endif
+ #include <atomic>
+ #include <chrono>
+-#include <unistd.h>
+ #include <signal.h>
+ #include <unordered_set>
+ #include <boost/circular_buffer.hpp>
