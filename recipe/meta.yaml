@@ -15,6 +15,7 @@ source:
 build:
   number: 5
   script_env:
+    - SQS_FORWARD_WHITELIST=CMAKE_PREFIX_PATH  # [win]
     - SQS_CMAKE_C_COMPILER=clang-cl  # [win]
     - SQS_CMAKE_CXX_COMPILER=clang-cl  # [win]
     - SQS_CMAKE_LINKER=lld-link  # [win]
