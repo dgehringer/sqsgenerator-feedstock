@@ -498,15 +498,16 @@ index fd636d4..9fc1ffe 100644
              V val = py::extract<V>(d[key]);
              result.emplace(std::make_pair(key, val));
 diff --git a/sqsgenerator/core/python/module_core.cpp b/sqsgenerator/core/python/module_core.cpp
-index 99e4920..32b9aba 100644
+index 99e4920..3a8634e 100644
 --- a/sqsgenerator/core/python/module_core.cpp
 +++ b/sqsgenerator/core/python/module_core.cpp
-@@ -1,10 +1,9 @@
+@@ -1,10 +1,10 @@
  //
  // Created by dominik on 02.09.21.
  //
 +#if defined(_MSC_VER) && _MSC_VER < 1500 // VC++ 8.0 and below
 +#define snprintf _snprintf
++#endif
  
 -//
 -// Created by dominik on 14.07.21.
