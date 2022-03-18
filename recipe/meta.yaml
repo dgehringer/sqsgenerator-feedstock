@@ -11,7 +11,7 @@ source:
   patches:
     - opt.patch
     - clang.patch
-    - win_bld-patch  # [win]
+    - win_bld.patch  # [win]
 
 build:
   number: 5
