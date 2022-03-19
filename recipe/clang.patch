@@ -485,10 +485,10 @@ index 9efb148..1e86113 100644
  #include <stdexcept>
  #include <boost/multi_array.hpp>
 diff --git a/sqsgenerator/core/python/CMakeLists.txt b/sqsgenerator/core/python/CMakeLists.txt
-index 0c94b83..52e27f0 100644
+index 0c94b83..1f377ef 100644
 --- a/sqsgenerator/core/python/CMakeLists.txt
 +++ b/sqsgenerator/core/python/CMakeLists.txt
-@@ -33,9 +33,25 @@ add_library(core SHARED
+@@ -33,9 +33,17 @@ add_library(core SHARED
          ${SQSGENERATOR_SOURCE_DIR}/structure_utils.cpp
           )
  
@@ -497,19 +497,11 @@ index 0c94b83..52e27f0 100644
 +if (WIN32)
 +  set_target_properties(core PROPERTIES SUFFIX .pyd)
 +  target_link_libraries(core ${Python3_LIBRARIES} ${Boost_LIBRARIES})
-+endif()
-+
-+if (UNIX AND NOT APPLE)
-+    set(LINUX TRUE)
-+endif()
-+
-+if (LINUX)
++else()
 +    set_target_properties(core PROPERTIES SUFFIX .so)
 +    target_link_libraries(core pthread ${Python3_LIBRARIES} ${Boost_LIBRARIES})
-+else()
-+    set_target_properties(core PROPERTIES SUFFIX .dylib)
-+    target_link_libraries(core pthread ${Python3_LIBRARIES} ${Boost_LIBRARIES})
 +endif()
++
 +
  set_target_properties(core PROPERTIES PREFIX "")
 -target_link_libraries(core pthread ${Python3_LIBRARIES} ${Boost_LIBRARIES})
