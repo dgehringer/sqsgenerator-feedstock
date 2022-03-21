@@ -14,8 +14,9 @@ source:
 build:
   number: 5
   script_env:
-    - CMAKE_CXX_FLAGS=/MD  # [win]
-    - SQS_CMAKE_EXE_LINKER_FLAGS=/MD  # [win]
+    - SQS_Boost_USE_STATIC_LIBS=OFF  # [win]
+    - CMAKE_CXX_FLAGS=-MD  # [win]
+    - SQS_CMAKE_EXE_LINKER_FLAGS=-MD  # [win]
     - SQS_FORWARD_WHITELIST=CMAKE_PREFIX_PATH  # [win]
     - SQS_CMAKE_C_COMPILER=clang-cl  # [win]
     - SQS_CMAKE_CXX_COMPILER=clang-cl  # [win]
