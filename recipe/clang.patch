@@ -222,7 +222,7 @@ index bd18ba5..14916ac 100644
 -    In case you **do not need** them any more and you can remove them again.
 -
 diff --git a/setup.py b/setup.py
-index a1e5d6e..7aea9b3 100644
+index a1e5d6e..858ce0e 100644
 --- a/setup.py
 +++ b/setup.py
 @@ -1,4 +1,4 @@
@@ -296,8 +296,9 @@ index a1e5d6e..7aea9b3 100644
 +                # plat = ('x64' if platform.architecture()[0] == '64bit' else 'Win32')
                  cmake_args += [
                      # These options are likely to be needed under Windows
-                     '-DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE',
+-                    '-DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE',
 -                    '-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_{}={}'.format(cfg.upper(), extdir),
++                    # '-DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE',
 +                    f'-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_{cfg.upper()}={extdir}'
                  ]
                  # Assuming that Visual Studio and MinGW are supported compilers
