@@ -1,15 +1,15 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 41841a7..ac72cfb 100644
+index 41841a7..79d9d68 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -36,6 +36,11 @@ message([BOOST]:LIBRARIES: ${Boost_LIBRARIES})
+@@ -33,9 +33,11 @@ configure_file(${PROJECT_SOURCE_DIR}/sqsgenerator/core/include/version.hpp.in ${
+ find_package(Boost REQUIRED COMPONENTS system python numpy log_setup log)
+ message([BOOST]:INCLUDE_DIRS: ${Boost_INCLUDE_DIRS})
+ message([BOOST]:LIBRARIES: ${Boost_LIBRARIES})
++message([BOOST]:LIBRARY_DIRS: ${Boost_LIBRARY_DIRS})
  include_directories(${Boost_INCLUDE_DIRS})
  set(CMAKE_CXX_LIBRARIES ${Boost_LIBRARIES})
  
-+if (WIN32)
-+    add_definitions(-DBOOST_ALL_NO_LIB)
-+    add_definitions(-DBOOST_ALL_DYN_LINK)
-+endif()
 +
  if(NOT Boost_USE_STATIC_LIBS)
      # There is an issue find FindBoost.cmake
@@ -222,7 +222,7 @@ index bd18ba5..14916ac 100644
 -    In case you **do not need** them any more and you can remove them again.
 -
 diff --git a/setup.py b/setup.py
-index a1e5d6e..858ce0e 100644
+index a1e5d6e..7aea9b3 100644
 --- a/setup.py
 +++ b/setup.py
 @@ -1,4 +1,4 @@
@@ -296,9 +296,8 @@ index a1e5d6e..858ce0e 100644
 +                # plat = ('x64' if platform.architecture()[0] == '64bit' else 'Win32')
                  cmake_args += [
                      # These options are likely to be needed under Windows
--                    '-DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE',
+                     '-DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE',
 -                    '-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_{}={}'.format(cfg.upper(), extdir),
-+                    # '-DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE',
 +                    f'-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_{cfg.upper()}={extdir}'
                  ]
                  # Assuming that Visual Studio and MinGW are supported compilers
@@ -502,14 +501,49 @@ index 9efb148..1e86113 100644
  #include <stdexcept>
  #include <boost/multi_array.hpp>
 diff --git a/sqsgenerator/core/python/CMakeLists.txt b/sqsgenerator/core/python/CMakeLists.txt
-index 0c94b83..1f377ef 100644
+index 0c94b83..2cbd665 100644
 --- a/sqsgenerator/core/python/CMakeLists.txt
 +++ b/sqsgenerator/core/python/CMakeLists.txt
-@@ -33,9 +33,17 @@ add_library(core SHARED
-         ${SQSGENERATOR_SOURCE_DIR}/structure_utils.cpp
-          )
+@@ -18,6 +18,32 @@ include_directories(${SQSGENERATOR_INCLUDE_DIR} include)
+ include_directories(${Python3_INCLUDE_DIRS})
+ include_directories(${Boost_INCLUDE_DIRS})
+ link_directories(${Python3_LIBRARY_DIRS})
++link_directories(${Boost_LIBRARY_DIRS})
++
++# https://stackoverflow.com/questions/28887680/linking-boost-library-with-boost-use-static-lib-off-on-windows
++if (WIN32)
++
++  # disable auto-linking in boost
++  add_definitions(-DBOOST_ALL_NO_LIB)
++  add_definitions(-DBOOST_ALL_DYN_LINK)
++  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
++
++  # add permissive flags
++  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /permissive-")
++
++  include(FetchContent)
++  # on Windows MSVC compiler is missing 128 unsigned integers, we therefore use https://github.com/calccrypto/uint128_t
++  FetchContent_Declare(
++     uint128t
++     GIT_REPOSITORY https://github.com/calccrypto/uint128_t.git
++     GIT_TAG ddc03839ea7efb78fa504ae8ecc2304e5ba80c3c
++  )
++
++  FetchContent_MakeAvailable(uint128t)
++
++  include_directories(${FETCHCONTENT_BASE_DIR}/uint128t-src)
++endif()
++
  
--set_target_properties(core PROPERTIES SUFFIX .so)
+ add_library(core SHARED
+         module_core.cpp
+@@ -31,11 +57,19 @@ add_library(core SHARED
+         ${SQSGENERATOR_SOURCE_DIR}/rank.cpp
+         ${SQSGENERATOR_SOURCE_DIR}/utils.cpp
+         ${SQSGENERATOR_SOURCE_DIR}/structure_utils.cpp
+-         )
++)
++
 +
 +if (WIN32)
 +  set_target_properties(core PROPERTIES SUFFIX .pyd)
@@ -519,7 +553,8 @@ index 0c94b83..1f377ef 100644
 +    target_link_libraries(core pthread ${Python3_LIBRARIES} ${Boost_LIBRARIES})
 +endif()
 +
-+
+ 
+-set_target_properties(core PROPERTIES SUFFIX .so)
  set_target_properties(core PROPERTIES PREFIX "")
 -target_link_libraries(core pthread ${Python3_LIBRARIES} ${Boost_LIBRARIES})
  if (USE_MPI)
@@ -557,7 +592,7 @@ index 99e4920..278876e 100644
  #include "types.hpp"
  #include "sqs.hpp"
 diff --git a/sqsgenerator/core/src/sqs.cpp b/sqsgenerator/core/src/sqs.cpp
-index 3261d81..db8b401 100644
+index 3261d81..f08b1b9 100644
 --- a/sqsgenerator/core/src/sqs.cpp
 +++ b/sqsgenerator/core/src/sqs.cpp
 @@ -14,7 +14,6 @@
@@ -647,7 +682,40 @@ index 3261d81..db8b401 100644
              #pragma omp critical
              {
                  BOOST_LOG_TRIVIAL(debug) << "do_pair_iterations::rank::" << mpi_rank << "::thread::" << thread_id << "::iteration_start = " << start_it;
-@@ -401,11 +414,20 @@ namespace sqsgenerator {
+@@ -346,16 +359,28 @@ namespace sqsgenerator {
+                     }
+ #endif
+                     // we do only an atomic read from the global shared variable in case the current is smaller than the thread internal
+-                    #pragma omp atomic read
+-                    best_objective_local = best_objective;
++                    #if defined(_WIN32) || defined(_WIN64)
++                        // MSCV2019 does not support "atomic" directive
++                        best_objective_local = best_objective;
++                    #else
++                        #pragma omp atomic read
++                        best_objective_local = best_objective;
++                    #endif
+ 
+                     SQSResult result(objective_local, {-1}, configuration_local, parameters_local);
+                     #pragma omp critical
+                     results.push_back(result);
+                     // synchronize writing to global best objective, only if the local one is really better
+                     if (objective_local < best_objective_local){
+-                        #pragma omp atomic write
+-                        best_objective = objective_local;
++                        #if defined(_WIN32) || defined(_WIN64)
++                            // MSCV2019 does not support "atomic" directive
++                            #pragma omp critical
++                            best_objective = objective_local;
++                        #else
++                            #pragma omp atomic write
++                            best_objective = objective_local;
++                        #endif
++
+                         best_objective_local = objective_local;
+ #if defined(USE_MPI)
+                         /*
+@@ -401,11 +426,20 @@ namespace sqsgenerator {
          } // pragma omp parallel
  
          // Restore the the old sigaction handler
@@ -670,6 +738,45 @@ index 3261d81..db8b401 100644
  #endif
  
          if ((do_shutdown && shutdown_requested.load())) {
+diff --git a/sqsgenerator/core/src/utils.cpp b/sqsgenerator/core/src/utils.cpp
+index 76d35fa..4bb5cde 100644
+--- a/sqsgenerator/core/src/utils.cpp
++++ b/sqsgenerator/core/src/utils.cpp
+@@ -3,6 +3,12 @@
+ //
+ 
+ #include "utils.hpp"
++#if defined(_WIN32) || defined(_WIN64)
++#include "uint128_t.h"
++#define UINT128_T uint128_t
++#else
++#define UINT128_T __uint128_t
++#endif
+ 
+ namespace sqsgenerator::utils {
+ 
+@@ -46,10 +52,10 @@ namespace sqsgenerator::utils {
+     // Code taken from: https://github.com/lemire/testingRNG/blob/master/source/wyhash.h
+     static inline uint64_t wyhash64_stateless(uint64_t *seed) {
+         *seed += UINT64_C(0x60bee2bee120fc15);
+-        __uint128_t tmp;
+-        tmp = (__uint128_t)*seed * UINT64_C(0xa3b195354a39b70d);
++        UINT128_T tmp;
++        tmp = (UINT128_T)*seed * UINT64_C(0xa3b195354a39b70d);
+         uint64_t m1 = (tmp >> 64) ^ tmp;
+-        tmp = (__uint128_t)m1 * UINT64_C(0x1b03738712fad5c9);
++        tmp = (UINT128_T)m1 * UINT64_C(0x1b03738712fad5c9);
+         uint64_t m2 = (tmp >> 64) ^ tmp;
+         return m2;
+     }
+@@ -61,6 +67,7 @@ namespace sqsgenerator::utils {
+          uint64_t m = uint64_t(x) * uint64_t(range);
+          return m >> 32;
+     }
++
+     // Simple Knuth-Fisher-Yates shuffle with random generator
+     void shuffle_configuration_(configuration_t &configuration, uint64_t *seed) {
+         for (uint32_t i=configuration.size(); i > 1; i--) {
 diff --git a/sqsgenerator/fallback/__init__.py b/sqsgenerator/fallback/__init__.py
 new file mode 100644
 index 0000000..fd9c056
