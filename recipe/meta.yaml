@@ -14,9 +14,7 @@ source:
 build:
   number: 5
   script_env:
-    - CMAKE_CXX_FLAGS="/MD /Zc:twoPhase-"  # [win]
-    - SQS_BOOST_ALL_NO_LIB=ON  # [win]
-    - SQS_BOOST_ALL_DYN_LINK=ON  # [win]
+    - CMAKE_CXX_FLAGS=/MD /Zc:twoPhase-  # [win]
     - SQS_CMAKE_VERBOSE_MAKEFILE=ON  # [win]
     - SQS_FORWARD_WHITELIST=CMAKE_PREFIX_PATH  # [win]
     - SQS_CMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL  # [win]
