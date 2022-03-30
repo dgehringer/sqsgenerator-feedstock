@@ -1,12 +1,367 @@
-Index: sqsgenerator/commands/analyse.py
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 41841a7..79d9d68 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -33,9 +33,11 @@ configure_file(${PROJECT_SOURCE_DIR}/sqsgenerator/core/include/version.hpp.in ${
+ find_package(Boost REQUIRED COMPONENTS system python numpy log_setup log)
+ message([BOOST]:INCLUDE_DIRS: ${Boost_INCLUDE_DIRS})
+ message([BOOST]:LIBRARIES: ${Boost_LIBRARIES})
++message([BOOST]:LIBRARY_DIRS: ${Boost_LIBRARY_DIRS})
+ include_directories(${Boost_INCLUDE_DIRS})
+ set(CMAKE_CXX_LIBRARIES ${Boost_LIBRARIES})
+ 
++
+ if(NOT Boost_USE_STATIC_LIBS)
+     # There is an issue find FindBoost.cmake
+     # https://gitlab.kitware.com/cmake/cmake/-/issues/20638: That's why log setup is added
+diff --git a/README.md b/README.md
+index 4796f4b..ff00d02 100644
+--- a/README.md
++++ b/README.md
+@@ -1,6 +1,7 @@
+-![build](https://git.unileoben.ac.at/p1655622/sqsgenerator/badges/master/pipeline.svg?style=flat&key_text=build)
+-![tests](https://git.unileoben.ac.at/p1655622/sqsgenerator/badges/master/pipeline.svg?style=flat&key_text=tests)
+-![coverage](https://git.unileoben.ac.at/p1655622/sqsgenerator/badges/master/coverage.svg) [![Documentation Status](https://readthedocs.org/projects/sqsgenerator/badge/?version=latest)](https://sqsgenerator.readthedocs.io/en/latest/?badge=latest)
++![conda](https://anaconda.org/conda-forge/sqsgenerator/badges/installer/conda.svg) 
++![downloads](
++https://anaconda.org/conda-forge/sqsgenerator/badges/downloads.svg)
++[![Documentation Status](https://readthedocs.org/projects/sqsgenerator/badge/?version=latest)](https://sqsgenerator.readthedocs.io/en/latest/?badge=latest)
+ 
+ 
+ <p align="center">
+@@ -27,25 +28,34 @@
+ ## Documentation
+ 
+   - You can find the online documentation [here](https://sqsgenerator.readthedocs.io/en/latest/)
+-  - Learn how to [get started](https://sqsgenerator.readthedocs.io/en/latest/how_to.html)
++  - Learn how to [get started](https://sqsgenerator.readthedocs.io/en/latest/how_to.html)!
+ 
+-## Requirements
+-
+-To install sqsgenerator you need the following things:
+-
+-  - a Python >= 3.6 distribution
+-  - [numpy](https://numpy.org) installed
+- 
+-[ase](https://wiki.fysik.dtu.dk/ase/) and [pymatgen](https://pymatgen.org/) are not required, however we strongly encourage you to install at least one of them. sqsgenerator uses those packages as backends to export the generated structures
+ 
+ ## Installation
+ 
+-An extensive [installation guide](https://sqsgenerator.readthedocs.io/en/latest/installation_guide.html) can be found in the documentation.
+-
+-For Linux users we provide pre-built [wheels](https://sqsgenerator.readthedocs.io/en/latest/installation_guide.html#with-pip). Just download the proper whl-file and install it using e. g
++### using conda
++The easiest way to install *sqsgenerator* is to use conda package manager. *sqsgenerator* is deployed on the
++*conda-forge* channel. To install use:
+ 
+ ```bash
+-pip install sqsgenerator-0.1-cp39-cp39-linux_x86_64.whl
++conda install -c conda-forge sqsgenerator
+ ```
+ 
+-In near future we will also update the conda-forge build
++  - The version published on [Anaconda Cloud](https://anaconda.org/conda-forge/sqsgenerator) is capable of OpenMP parallelization only
++  - [ase](https://wiki.fysik.dtu.dk/ase/), [pyiron](https://pyiron.org) and [pymatgen](https://pymatgen.org/) are not
++    required to install *sqsgenerator*. However, we strongly encourage you to install at least one of them.
++    *sqsgenerator* uses those packages as backends to export the generated structures
++
++### building it yourself
++On HPC systems where also MPI support, and optimized binaries are desirable, it's highly recommended to build
++*sqsgenerator* yourself. An extensive [installation guide](https://sqsgenerator.readthedocs.io/en/latest/installation_guide.html)
++can be found in the documentation. The following prerequisites are needed:
++
++  - a C++17 enabled compiler, with OpenMP support
++  - Python >= 3.6 <sup>*</sup>
++  - numpy <sup>**</sup>
++  - [boost](https://www.boost.org/) libraries,
++    - [Boost.Python](https://www.boost.org/doc/libs/1_78_0/libs/python/doc/html/tutorial/index.html) compatible with
++      your Python interpreter<sup>*</sup>
++    - [Boost.Python (numpy)](https://www.boost.org/doc/libs/1_78_0/libs/python/doc/html/numpy/index.html) extensions
++      compatible with you environment<sup>* ,**</sup>
+diff --git a/docs/source/index.md b/docs/source/index.md
+index 8528621..0d610c2 100644
+--- a/docs/source/index.md
++++ b/docs/source/index.md
+@@ -1,17 +1,6 @@
+ 
+ # Welcome to `sqsgenerator`'s documentation!
+ 
+-```{admonition} Version mismatch with **conda-forge** channel
+-:class: danger
+-
+-The `sqsgenerator` package was rewritten (nearly from scratch) and ported from C to C++. Therefore, it is still
+-under evaluation, while the **conda-forge** channel does contain still the old version of the package.
+-
+-**This documentation** page **does not apply** to the old version, but rather to actual version of the package as it 
+-is found [here](https://github.com/dgehringer/sqsgenerator)
+-
+-```
+-
+ ## Highlights
+ 
+   - Easy integration with popular frameworks such as [ase](https://wiki.fysik.dtu.dk/ase/),
+diff --git a/docs/source/installation_guide.md b/docs/source/installation_guide.md
+index bd18ba5..14916ac 100644
+--- a/docs/source/installation_guide.md
++++ b/docs/source/installation_guide.md
+@@ -13,12 +13,6 @@ dependencies of `sqsgenerator`. However we **strongly encourage** you to install
+ 
+ ## ... with `conda`
+ 
+-```{warning}
+-`sqsgenerator` is still under evaluation, therefore the newest version is **yet** not available at the conda-forge channel
+-Until evaluation phase is finished, we kindly ask you to **build it yourself**, or to use one of the **pre-built binaries**.
+-
+-```
+-
+ `sqsgenerator` is available on the `conda-forge` channel. In case you are already using an Anaconda distribution we 
+ strongly encourage you to head for this installation option
+ 
+@@ -27,34 +21,13 @@ conda install -c conda-forge sqsgenerator
+ ```
+ 
+ To allow for fast generation of random structures, `sqsgenerator`s core modules support hybrid parallelization ([OpenMP](https://www.openmp.org) + [MPI](https://www.mpi-forum.org/))
+-The version hosted on `conda-forge` supports thread-level-parallelism (only [OpenMP](https://www.openmp.org))
++The version hosted on `conda-forge` supports thread-level-parallelism only. ([OpenMP](https://www.openmp.org))
+ 
+ ```{note}
+ To obtain an **MPI enabled** version of the package, you have to **build it** yourself.
+ ```
+ 
+ 
+-## ... with `pip`
+-
+-`sqsgenerator` is not hosted on PyPi. You still can install the package using `pip` by using one of the 
+-prebuilt binary packages:
+-
+-
+-| OS    | arch   | Py   | Wheel                                                        |
+-| ----- | ------ | ---- | ------------------------------------------------------------ |
+-| linux | x86_64 | 3.6  | [sqsgenerator-0.1-cp36-cp36m-linux_x86_64.whl](http://oc.unileoben.ac.at/index.php/s/qqDIydH02PkV32V/download) |
+-| linux | x86_64 | 3.7  | [sqsgenerator-0.1-cp37-cp37m-linux_x86_64.whl](http://oc.unileoben.ac.at/index.php/s/34xlYhyZxkyb6xy/download) |
+-| linux | x86_64 | 3.8  | [sqsgenerator-0.1-cp38-cp38-linux_x86_64.whl](http://oc.unileoben.ac.at/index.php/s/gTk345lGTwk3C0G/download) |
+-| linux | x86_64 | 3.9  | [sqsgenerator-0.1-cp39-cp39-linux_x86_64.whl](http://oc.unileoben.ac.at/index.php/s/3x01KBKarx11BgQ/download) |
+-
+-Once you have choosen the correct wheel for your Python interpreter (`python --vserion`), download one from the table above:
+-You can install the downloaded wheel with:
+-
+-```{code-block} bash
+-pip install sqsgenerator-0.1-cp36-cp36m-linux_x86_64.whl
+-```
+-
+-
+ ## ... by building it yourself
+ 
+ ### Toolchain 
+@@ -63,7 +36,7 @@ through this section carefully.
+ 
+   - Python interpreter and headers (**>= 3.6**)
+   - [numpy](https://numpy.org) installed
+-  - A C++ compiler, such as `g++`, which has support for [OpenMP](https://www.openmp.org/) and supports C++17
++  - C++ compiler, with support for [OpenMP](https://www.openmp.org/) and C++17 standard
+   - [Boost](https://www.boost.org/) libraries are needed to compile the core modules. In particular the following subset of the boost libraries are needed
+     - `libboost_python` (Python bindings)
+     - `libboost_numpy` (Python bindings)
+@@ -75,6 +48,12 @@ through this section carefully.
+ 
+ Please make sure to have **all** those tools installed, before installing sqsgenerator.
+ 
++```{admonition} Compatibility between Python interpreter and boost libraries
++:class: note
++
++Please make sure that you boost libs `libboost_python` and `libboost_numpy` are compatible with the 
++Python interpreter you build `sqsgenerator` against.
++```
+ 
+ ### Environment variable forwarding
+ 
+@@ -110,7 +89,7 @@ With `conda` it is easy to install the needed toolchain, and thus get to a quick
+ 
+     ```{code-block} bash
+     conda activate sqs-build
+-    conda install -c anaconda boost
++    conda install -c anaconda boost boost-cpp
+     # in case you do not have a system g++/cmake
+     conda install -c anaconda cmake gxx_linux-64 
+     ```
+@@ -131,13 +110,11 @@ With `conda` it is easy to install the needed toolchain, and thus get to a quick
+     **cmake** a hint, where to find them. The same is true if you want to use Anacondas C++ compiler (`CMAKE_CXX_COMPILER="x86_64-conda-linux-gnu-g++"`)
+ 
+     ```{code-block} bash
+-    pushd sqsgenerator
+-    SQS_Boost_USE_STATIC_LIBS=ON \ # optional
++    cd sqsgenerator
+     SQS_Boost_INCLUDE_DIR="${CONDA_PREFIX}/include" \
+     SQS_Boost_LIBRARY_DIR_RELEASE="${CONDA_PREFIX}/lib" \
+     CMAKE_CXX_COMPILER="x86_64-conda-linux-gnu-g++" \
+     pip install .
+-    popd
+     ```
+    
+     In case you want to build a MPI build version you have to add `SQS_USE_MPI=ON` to the installation instructions.
+@@ -145,7 +122,7 @@ With `conda` it is easy to install the needed toolchain, and thus get to a quick
+     *cmake* to so, by adding `SQS_MPI_HOME` which points the installation directory 
+ 
+     ```{code-block} bash
+-    pushd sqsgenerator
++    cd sqsgenerator
+     # SQS_MPI_HOME=/path/to/mpi/implementation/root
+     SQS_USE_MPI=ON \
+     SQS_Boost_USE_STATIC_LIBS=ON \
+@@ -153,12 +130,4 @@ With `conda` it is easy to install the needed toolchain, and thus get to a quick
+     SQS_Boost_LIBRARY_DIR_RELEASE="${CONDA_PREFIX}/lib" \
+     CMAKE_CXX_COMPILER="x86_64-conda-linux-gnu-g++" \
+     pip install .
+-    popd
+     ```
+-
+-6. **Remove build dependencies**
+-
+-    This step is only optional. In case you have compiled the core modules with `SQS_Boost_USE_STATIC_LIBS=ON` the created
+-    library does not depend any more on the `boost` libraries.
+-    In case you **do not need** them any more and you can remove them again.
+-
+diff --git a/setup.py b/setup.py
+index a1e5d6e..b77dcdd 100644
+--- a/setup.py
++++ b/setup.py
+@@ -1,4 +1,4 @@
+-import re
++
+ import re
+ import os
+ import sys
+@@ -13,7 +13,7 @@ WITH_MPI = False
+ 
+ opt_flags = {
+     'Release': {
+-        'unix': ['-O3', '-DNDEBUG', '-march=native', '-mtune=native', '-ffast-math', '-fvisibility=hidden']
++        'unix': ['-O3', '-DNDEBUG']
+     },
+     'Debug': {
+         'unix': ['-g']
+@@ -73,47 +73,71 @@ class CMakeBuildExt(build_ext):
+                 # Hint CMake to use the same Python executable that
+                 # is launching the build, prevents possible mismatching if
+                 # multiple versions of Python are installed
+-                '-DPython3_EXECUTABLE={}'.format(sys.executable),
++                f'-DPython3_EXECUTABLE={sys.executable}',
+                 # Add other project-specific CMake arguments if needed
+                 # ...
+-                f'-DUSE_MPI={"ON" if self.with_mpi else "OFF"}',
++                '-DUSE_MPI={}'.format("ON" if self.with_mpi else "OFF"),
+                 # '-DCMAKE_CXX_FLAGS_{}={}'.format(cfg.upper(),  )
+             ]
+             cmake_cxx_flags = ' '.join(opt_flags.get(cfg, {}).get(self.compiler.compiler_type, []))
+ 
+             env_var_prefix = 'SQS_'
+-            # we allow to overload cmake compiler options
++            # we allow overloading cmake compiler options
++            # for windows builds CMake chooses bad default on azure-pipelines
++            # we implement it as a whitelist
++            whitelist_env_var_name = 'SQS_FORWARD_WHITELIST'
++            cmake_var_whitelist = os.environ.get(whitelist_env_var_name, None)
++            cmake_var_whitelist = cmake_var_whitelist \
++                if cmake_var_whitelist is None \
++                else list(filter(bool, cmake_var_whitelist.split(',')))
++
+             for env_var_name, env_var_value in os.environ.items():
++                if env_var_name == whitelist_env_var_name:
++                    continue
+                 if env_var_name == 'CMAKE_CXX_FLAGS':
+                     # we append them to our release/debug flags
+                     cmake_cxx_flags += f' {env_var_value}'
+                 elif env_var_name.startswith('CMAKE'):
++
++                    if cmake_var_whitelist is not None:
++                        if env_var_name not in cmake_var_whitelist:
++                            print(f'sqsgenerator.setup: Blocking env-var "{env_var_name}" '
++                                  f'since it is not whitelisted in {whitelist_env_var_name}')
++                            continue
++                    print(f'sqsgenerator.setup: Forwarding env-var "{env_var_name}" -> "-D{env_var_name}"')
+                     cmake_args.append(f'-D{env_var_name}={env_var_value}')
+                 m = re.match(f'{env_var_prefix}(?P<varname>\w+)', env_var_name)
+                 if m:
+                     env_var_name_real = m.groupdict()['varname']
++                    print(f'sqsgenerator.setup: Forwarding env-var "{env_var_name}" -> "-D{env_var_name_real}"')
+                     cmake_args.append(f'-D{env_var_name_real}={env_var_value}')
+ 
+-            cmake_args.append('-DCMAKE_CXX_FLAGS_{}={}'.format(cfg.upper(), cmake_cxx_flags))
+-            pprint.pprint(cmake_args)
++
+             # We can handle some platform-specific settings at our discretion
+             if platform.system() == 'Windows':
+-                plat = ('x64' if platform.architecture()[0] == '64bit' else 'Win32')
++                print('sqsgenerator.setup.py -> configuring CMake for Windows')
++                # plat = ('x64' if platform.architecture()[0] == '64bit' else 'Win32')
+                 cmake_args += [
+                     # These options are likely to be needed under Windows
+                     '-DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE',
+-                    '-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_{}={}'.format(cfg.upper(), extdir),
++                    f'-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_{cfg.upper()}={extdir}'
+                 ]
+                 # Assuming that Visual Studio and MinGW are supported compilers
+                 if self.compiler.compiler_type == 'msvc':
+                     cmake_args += [
+-                        f'-DCMAKE_GENERATOR_PLATFORM={plat}'
++                        # f'-DCMAKE_GENERATOR_PLATFORM={plat}',
++                        '-G', 'Ninja'
+                     ]
+                 else:
+                     cmake_args += [
+                         '-G', 'MinGW Makefiles',
+                     ]
+ 
++            cmake_args.append(f'-DCMAKE_CXX_FLAGS_{cfg.upper()}={cmake_cxx_flags}')
++
++            # for debugging reasons we print the actual config which is passed to cmake
++            pprint.pprint(cmake_args)
++
+             subprocess.check_call(['cmake', ext.cmake_lists_dir] + cmake_args, cwd=self.build_temp)
+             cmake_build_args = ['cmake', '--build', '.', '--config', cfg]
+             if ext.target: cmake_build_args += ['--target', ext.target]
+@@ -129,7 +153,7 @@ class CMakeBuildExt(build_ext):
+         """finalize options"""
+         super(CMakeBuildExt, self).finalize_options()
+ 
+-        
++
+ setup(
+     name='sqsgenerator',
+     version='0.1',
+@@ -143,7 +167,7 @@ setup(
+         'build_ext': CMakeBuildExt,
+         'install': InstallCustom
+     },
+-    install_requires=['attrdict', 'numpy', 'click', 'rich>=9.11.0', 'pyyaml', 'frozendict'],
++    install_requires=['six', 'numpy', 'click', 'rich>=9.11.0', 'pyyaml', 'frozendict'],
+     entry_points={
+         'console_scripts': ['sqsgen=sqsgenerator.cli:cli']
+     },
+diff --git a/sqsgenerator/cli.py b/sqsgenerator/cli.py
+index d03f23e..a8adb75 100644
+--- a/sqsgenerator/cli.py
++++ b/sqsgenerator/cli.py
+@@ -12,12 +12,12 @@ from sqsgenerator.core import __version__, __features__
+ 
+ def make_version_string():
+     major, minor, *_ = __version__
+-    return f'{major}.{minor}'
++    return '%i.%i' % (major, minor)
+ 
+ 
+ def make_repo_status():
+     _, _, commit, branch = __version__
+-    return f'{commit}@{branch}'
++    return '%s@%s' % (commit, branch)
+ 
+ 
+ _title = '[bold]sqsgenerator[/bold] - A CLI tool to find optimized SQS structures'
 diff --git a/sqsgenerator/commands/analyse.py b/sqsgenerator/commands/analyse.py
---- a/sqsgenerator/commands/analyse.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
-+++ b/sqsgenerator/commands/analyse.py	(date 1647259082333)
-@@ -10,9 +10,9 @@
+index 9777ed9..d061713 100644
+--- a/sqsgenerator/commands/analyse.py
++++ b/sqsgenerator/commands/analyse.py
+@@ -10,9 +10,9 @@ import functools
  from rich import box
  from rich.text import Text
  from rich.table import Table
@@ -17,15 +372,33 @@ diff --git a/sqsgenerator/commands/analyse.py b/sqsgenerator/commands/analyse.py
  from operator import attrgetter as attr, itemgetter as item
  from sqsgenerator.commands.help import parameter_help as help, command_help
  from sqsgenerator.settings import construct_settings, process_settings, defaults
-Index: sqsgenerator/commands/export.py
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
+diff --git a/sqsgenerator/commands/common.py b/sqsgenerator/commands/common.py
+index 209030c..8fc801e 100644
+--- a/sqsgenerator/commands/common.py
++++ b/sqsgenerator/commands/common.py
+@@ -78,7 +78,7 @@ def make_help_link(parameter: str) -> str:
+ 
+ def exit_on_input_parameter_error(f):
+     """
+-    Decorator: Wraps a @parameter decorated function -> catches a eventual `BadSettings` error -> creates a help-link
++    Decorator: Wraps a @parameter decorated function -> catches an eventual `BadSettings` error -> creates a help-link
+     for the parameter -> redirects the `BadSettings` into `click.Abort` to stop CLI execution
+     """
+ 
+@@ -100,7 +100,7 @@ def exit_on_input_parameter_error(f):
+ 
+ def click_settings_file(process=None, default_name='sqs.yaml', ignore=()):
+     """
+-    Decorator-Factory: A lot of the commands need an input YAML file -> creates a a decorator which parses a settings
++    Decorator-Factory: A lot of the commands need an input YAML file -> creates a decorator which parses a settings
+     file and takes an input format as parameter. The decorator processes the specified file
+     :param process: process (parsed) the settings dictionary with sqsgenerator.core (default is `None`)
+     :type process: Iterable[str] or None
 diff --git a/sqsgenerator/commands/export.py b/sqsgenerator/commands/export.py
---- a/sqsgenerator/commands/export.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
-+++ b/sqsgenerator/commands/export.py	(date 1647259370472)
-@@ -4,8 +4,8 @@
+index 490db97..6670e31 100644
+--- a/sqsgenerator/commands/export.py
++++ b/sqsgenerator/commands/export.py
+@@ -4,8 +4,8 @@ Utility command to export the internal dict-like results into structure files
  
  import os
  import click
@@ -35,331 +408,546 @@ diff --git a/sqsgenerator/commands/export.py b/sqsgenerator/commands/export.py
  from sqsgenerator.settings.readers import read_structure
  from sqsgenerator.compat import Feature as F, have_feature
  from sqsgenerator.commands.common import click_settings_file, error
-Index: sqsgenerator/settings/defaults.py
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
-diff --git a/sqsgenerator/settings/defaults.py b/sqsgenerator/settings/defaults.py
---- a/sqsgenerator/settings/defaults.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
-+++ b/sqsgenerator/settings/defaults.py	(date 1647244977512)
-@@ -1,7 +1,8 @@
-+
- import collections
- import numpy as np
+diff --git a/sqsgenerator/commands/help.py b/sqsgenerator/commands/help.py
+index 7df028c..ff7b9e8 100644
+--- a/sqsgenerator/commands/help.py
++++ b/sqsgenerator/commands/help.py
+@@ -2,8 +2,8 @@
+ A data file storing the CLI's help strings
+ """
+ 
 -from attrdict import AttrDict
- from operator import itemgetter as item
+ from sqsgenerator.io import default_adapter
 +from sqsgenerator.fallback.attrdict import AttrDict
- from sqsgenerator.settings.utils import build_structure, to_internal_composition_specs
- from sqsgenerator.settings.functional import const, if_
- from sqsgenerator.core import IterationMode, Structure, default_shell_distances as default_shell_distances_core, \
-Index: sqsgenerator/settings/utils.py
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
-diff --git a/sqsgenerator/settings/utils.py b/sqsgenerator/settings/utils.py
---- a/sqsgenerator/settings/utils.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
-+++ b/sqsgenerator/settings/utils.py	(date 1647252159621)
-@@ -58,7 +58,7 @@
-             if k == 0:
-                 return k
-             else:
--                raise BadSettings('I can only iterpret "0" as an atomic species')
-+                raise BadSettings('I can only interpret "0" as an atomic species')
-         else:
-             return symbol_to_z(k)
- 
-Index: sqsgenerator/settings/functional.py
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
-diff --git a/sqsgenerator/settings/functional.py b/sqsgenerator/settings/functional.py
---- a/sqsgenerator/settings/functional.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
-+++ b/sqsgenerator/settings/functional.py	(date 1647256978546)
-@@ -1,8 +1,8 @@
- import enum
--import attrdict
- import functools
- import typing as T
- from sqsgenerator.core import get_function_logger
-+from sqsgenerator.fallback.attrdict import AttrDict
- from sqsgenerator.settings.exceptions import BadSettings
  
  
-@@ -24,18 +24,18 @@
+ command_help = AttrDict(dict(
+diff --git a/sqsgenerator/compat.py b/sqsgenerator/compat.py
+index 1766978..4ac163f 100644
+--- a/sqsgenerator/compat.py
++++ b/sqsgenerator/compat.py
+@@ -54,13 +54,13 @@ def _check_features():
+             getter = functools.partial(operator.itemgetter(feat.value), __features)
+             setattr(self_module, f'have_{feat.value}', getter)
+             message = f'Feature "{feat.value}" was ' + ('found' if __features[feat.value] else 'not found')
+-            logging.getLogger(f'compat.check_features').info(message)
++            logging.getLogger('compat.check_features').info(message)
  
-     def _decorator(f: T.Callable):
+ 
+ def have_feature(feature: T.Union[Feature, str]) -> bool:
+     assert is_initialized()
+-    freature_value = feature.value if isinstance(feature, Feature) else feature
+-    return freature_value in __features and __features[freature_value]
++    feature_value = feature.value if isinstance(feature, Feature) else feature
++    return feature_value in __features and __features[feature_value]
+ 
+ 
+ def require(*features: Feature, condition=all):
+@@ -70,8 +70,11 @@ def require(*features: Feature, condition=all):
+ 
          @functools.wraps(f)
--        def _wrapped(settings: attrdict.AttrDict):
-+        def _wrapped(settings: AttrDict):
-             is_required = get_required(settings)
-             k = get_key(settings)
-             nonlocal name
-             if k not in settings:
-                 if is_required:
-                     if not have_default:
--                        raise BadSettings(f'Required parameter "{name}" was not found', parameter=name)
-+                        raise BadSettings('Required parameter "{}" was not found'.format(name), parameter=name)
-                     else:
-                         # a default is needed but found
-                         df = get_default(settings)
--                        get_function_logger(f).info(f'Parameter "{name}" was not found defaulting to: "{df}"')
-+                        get_function_logger(f).info('Parameter "{}" was not found defaulting to: "{}"'.format(name, df))
-                         return df
-             else:
-                 # we catch the exception here and raise it again, to inject the parameter information automatically
-Index: sqsgenerator/settings/readers.py
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
-diff --git a/sqsgenerator/settings/readers.py b/sqsgenerator/settings/readers.py
---- a/sqsgenerator/settings/readers.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
-+++ b/sqsgenerator/settings/readers.py	(date 1647254093075)
-@@ -11,9 +11,8 @@
- import collections
- import collections.abc
- from functools import partial
--from attrdict import AttrDict
- from operator import itemgetter as item
+         def _wrapper(*args, **kwargs):
+-            if not condition(map(have_feature, features)): raise FeatureNotAvailableException(features)
++            if not condition(map(have_feature, features)):
++                raise FeatureNotAvailableException(features)
++
+             return f(*args, **kwargs)
++
+         return _wrapper
+ 
+     return _decorator
+@@ -87,7 +90,9 @@ def available_features():
+ 
+ 
+ def available_features_with_version():
+-    default_version = lambda _ : ''
++
++    def default_version(*_):
++        return ''
+ 
+     def module_version_attr(f):
+         feature = Feature(f)
+diff --git a/sqsgenerator/core/include/structure_utils.hpp b/sqsgenerator/core/include/structure_utils.hpp
+index af44148..9c82293 100644
+--- a/sqsgenerator/core/include/structure_utils.hpp
++++ b/sqsgenerator/core/include/structure_utils.hpp
+@@ -8,6 +8,7 @@
+ 
+ #include "types.hpp"
+ #include "utils.hpp"
++#include <set>
+ #include <vector>
+ #include <limits>
+ #include <algorithm>
+diff --git a/sqsgenerator/core/include/types.hpp b/sqsgenerator/core/include/types.hpp
+index f13572d..8b0d55b 100644
+--- a/sqsgenerator/core/include/types.hpp
++++ b/sqsgenerator/core/include/types.hpp
+@@ -54,7 +54,7 @@ namespace sqsgenerator {
+     using Shape = std::array<size_t, NDims>;
+ 
+     // The array consists of {size_t i, size_t j, size_t shell, size_t shell_index}
+-    typedef std::array<pair_shell_matrix_t::index, 4> AtomPair;
++    typedef std::tuple<pair_shell_matrix_t::index, pair_shell_matrix_t::index, pair_shell_matrix_t::index, pair_shell_matrix_t::index> AtomPair;
+ 
+     constexpr species_t ALL_SITES = -1;
+ }
+diff --git a/sqsgenerator/core/include/utils.hpp b/sqsgenerator/core/include/utils.hpp
+index 9efb148..1e86113 100644
+--- a/sqsgenerator/core/include/utils.hpp
++++ b/sqsgenerator/core/include/utils.hpp
+@@ -6,6 +6,7 @@
+ #define SQSGENERATOR_UTILS_HPP
+ 
+ #include "types.hpp"
++#include <set>
+ #include <sstream>
+ #include <stdexcept>
+ #include <boost/multi_array.hpp>
+diff --git a/sqsgenerator/core/python/CMakeLists.txt b/sqsgenerator/core/python/CMakeLists.txt
+index 0c94b83..a847663 100644
+--- a/sqsgenerator/core/python/CMakeLists.txt
++++ b/sqsgenerator/core/python/CMakeLists.txt
+@@ -18,8 +18,43 @@ include_directories(${SQSGENERATOR_INCLUDE_DIR} include)
+ include_directories(${Python3_INCLUDE_DIRS})
+ include_directories(${Boost_INCLUDE_DIRS})
+ link_directories(${Python3_LIBRARY_DIRS})
++link_directories(${Boost_LIBRARY_DIRS})
+ 
+-add_library(core SHARED
++# https://stackoverflow.com/questions/28887680/linking-boost-library-with-boost-use-static-lib-off-on-windows
++if (WIN32)
++
++  # add permissive flags
++  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /permissive-")
++
++  include(FetchContent)
++  # on Windows MSVC compiler is missing 128 unsigned integers, we therefore use https://github.com/calccrypto/uint128_t
++  FetchContent_Declare(
++     uint128t
++     GIT_REPOSITORY https://github.com/calccrypto/uint128_t.git
++     GIT_TAG ddc03839ea7efb78fa504ae8ecc2304e5ba80c3c
++  )
++
++  FetchContent_MakeAvailable(uint128t)
++
++  include_directories(${FETCHCONTENT_BASE_DIR}/uint128t-src)
++
++  add_library(core SHARED
++        module_core.cpp
++        data.cpp
++        iteration.cpp
++        helpers.cpp
++        ${SQSGENERATOR_SOURCE_DIR}/sqs.cpp
++        ${SQSGENERATOR_SOURCE_DIR}/settings.cpp
++        ${SQSGENERATOR_SOURCE_DIR}/atomistics.cpp
++        ${SQSGENERATOR_SOURCE_DIR}/result.cpp
++        ${SQSGENERATOR_SOURCE_DIR}/rank.cpp
++        ${SQSGENERATOR_SOURCE_DIR}/utils.cpp
++        ${SQSGENERATOR_SOURCE_DIR}/structure_utils.cpp
++        ${FETCHCONTENT_BASE_DIR}/uint128t-src/uint128_t.cpp
++  )
++
++else()
++    add_library(core SHARED
+         module_core.cpp
+         data.cpp
+         iteration.cpp
+@@ -31,11 +66,20 @@ add_library(core SHARED
+         ${SQSGENERATOR_SOURCE_DIR}/rank.cpp
+         ${SQSGENERATOR_SOURCE_DIR}/utils.cpp
+         ${SQSGENERATOR_SOURCE_DIR}/structure_utils.cpp
+-         )
++    )
++endif()
++
++
++if (WIN32)
++  set_target_properties(core PROPERTIES SUFFIX .pyd)
++  target_link_libraries(core ${Python3_LIBRARIES} ${Boost_LIBRARIES})
++else()
++    set_target_properties(core PROPERTIES SUFFIX .so)
++    target_link_libraries(core pthread ${Python3_LIBRARIES} ${Boost_LIBRARIES})
++endif()
++
+ 
+-set_target_properties(core PROPERTIES SUFFIX .so)
+ set_target_properties(core PROPERTIES PREFIX "")
+-target_link_libraries(core pthread ${Python3_LIBRARIES} ${Boost_LIBRARIES})
+ if (USE_MPI)
+     target_link_libraries(core ${MPI_CXX_LIBRARIES})
+ endif()
+diff --git a/sqsgenerator/core/python/helpers.hpp b/sqsgenerator/core/python/helpers.hpp
+index fd636d4..9fc1ffe 100644
+--- a/sqsgenerator/core/python/helpers.hpp
++++ b/sqsgenerator/core/python/helpers.hpp
+@@ -137,7 +137,7 @@ namespace sqsgenerator::python::helpers {
+         std::map<K,V> result;
+         py::list keys = d.keys();
+         auto length {py::len(d)};
+-        for (ssize_t i = 0; i < length ; i++) {
++        for (size_t i = 0; i < length ; i++) {
+             K key = py::extract<K>(keys[i]);
+             V val = py::extract<V>(d[key]);
+             result.emplace(std::make_pair(key, val));
+diff --git a/sqsgenerator/core/python/module_core.cpp b/sqsgenerator/core/python/module_core.cpp
+index 99e4920..f31d8e8 100644
+--- a/sqsgenerator/core/python/module_core.cpp
++++ b/sqsgenerator/core/python/module_core.cpp
+@@ -1,10 +1,14 @@
+-//
+-// Created by dominik on 02.09.21.
+-//
+ 
+-//
+-// Created by dominik on 14.07.21.
+-//
++#if defined(_WIN32) || defined(_WIN64)
++#include <stdio.h>
++#endif
++
++#if defined(_WIN32) || defined(_WIN64) && !defined(HAVE_SNPRINTF)
++#define HAVE_SNPRINTF
++#define snprintf _snprintf
++#define vsnprintf _vsnprintf
++#endif
++
+ #include "version.hpp"
+ #include "types.hpp"
+ #include "sqs.hpp"
+diff --git a/sqsgenerator/core/src/sqs.cpp b/sqsgenerator/core/src/sqs.cpp
+index 3261d81..f08b1b9 100644
+--- a/sqsgenerator/core/src/sqs.cpp
++++ b/sqsgenerator/core/src/sqs.cpp
+@@ -14,7 +14,6 @@
+ #endif
+ #include <atomic>
+ #include <chrono>
+-#include <unistd.h>
+ #include <signal.h>
+ #include <unordered_set>
+ #include <boost/circular_buffer.hpp>
+@@ -122,8 +121,9 @@ namespace sqsgenerator {
+ 
+     std::vector<size_t> convert_pair_list(const std::vector<AtomPair> &pair_list) {
+         std::vector<size_t> result;
++        pair_shell_matrix_t::index i, j, _, shell_index;
+         for (const auto &pair : pair_list) {
+-            auto[i, j, _, shell_index] = pair;
++            std::tie(i, j, _, shell_index) = pair;
+             result.push_back(i);
+             result.push_back(j);
+             result.push_back(shell_index);
+@@ -145,19 +145,26 @@ namespace sqsgenerator {
+ #endif
+ 
+     std::tuple<std::vector<SQSResult>, timing_map_t> do_pair_iterations(const IterationSettings &settings) {
+-        typedef boost::circular_buffer<SQSResult> result_buffer_t; // this typedef is an implementation detail and used just in this method
+-        auto threads_per_rank {settings.threads_per_rank()};
 -
-+from sqsgenerator.fallback.attrdict import AttrDict
- from sqsgenerator.io import read_structure_from_file
- from sqsgenerator.settings.exceptions import BadSettings
- from sqsgenerator.core import IterationMode, Structure, make_supercell
-@@ -34,14 +33,14 @@
- @parameter('atol', default=defaults.atol)
- def read_atol(settings: AttrDict):
-     if not isinstance(settings.atol, float) or settings.atol < 0:
--        raise BadSettings(f'The absolute tolerance can be only a positive floating point number')
-+        raise BadSettings('The absolute tolerance can be only a positive floating point number')
-     return settings.atol
+-        // setup the signal handler
++    typedef boost::circular_buffer<SQSResult> result_buffer_t; // this typedef is an implementation detail and used just in this method
++    auto threads_per_rank {settings.threads_per_rank()};
++
++    // setup the signal handler
++#if defined(_WIN32) || defined(_WIN64)
++    typedef void (*signal_handler_ptr)(int);
++    signal_handler_ptr old_sigint_handler, old_sigabrt_handler;
++    old_sigint_handler = signal(SIGINT, handle_signal_sigint);
++    old_sigabrt_handler = signal(SIGABRT, handle_signal_sigint);
++#else
++    struct sigaction old_sigint_handler;
++    {
++        struct sigaction new_sigint_handler;
++        new_sigint_handler.sa_handler = handle_signal_sigint;
++        sigemptyset(&new_sigint_handler.sa_mask);
++        new_sigint_handler.sa_flags = 0x0;
++        sigaction(SIGINT, &new_sigint_handler, &old_sigint_handler);
++    }
++#endif
  
+-        struct sigaction old_sigint_handler;
+-        {
+-            struct sigaction new_sigint_handler;
+-            new_sigint_handler.sa_handler = handle_signal_sigint;
+-            sigemptyset(&new_sigint_handler.sa_mask);
+-            new_sigint_handler.sa_flags = 0x0;
+-            sigaction(SIGINT, &new_sigint_handler, &old_sigint_handler);
+-        }
+ #if defined(USE_MPI)
+         /*
+          * Upon hitting Ctrl+C Python has registered it's own signal handler which raises the Keyboard interrupt
+@@ -165,6 +172,10 @@ namespace sqsgenerator {
+          * "mpiexec" a SIGTERM is propagated to all child processes, therefore we also put a handler for this signal
+          * See: https://www.open-mpi.org/doc/v3.0/man1/mpirun.1.php#sect15
+          */
++    #if defined(_WIN32) || defined(_WIN64)
++        signal_handler_ptr old_sigterm_handler;
++        old_sigterm_handler = signal(SIGTERM, handle_signal_sigterm);
++    #else
+         struct sigaction old_sigterm_handler;
+         {
+             struct sigaction new_sigterm_handler;
+@@ -173,6 +184,7 @@ namespace sqsgenerator {
+             new_sigterm_handler.sa_flags = 0x0;
+             sigaction(SIGTERM, &new_sigterm_handler, &old_sigterm_handler);
+         }
++    #endif
+ #endif
  
- @parameter('rtol', default=defaults.rtol)
- def read_rtol(settings: AttrDict):
-     if not isinstance(settings.rtol, float) or settings.rtol < 0:
--        raise BadSettings(f'The relative tolerance can be only a positive floating point number')
-+        raise BadSettings('The relative tolerance can be only a positive floating point number')
-     return settings.rtol
+ #if defined(USE_MPI)
+@@ -277,7 +289,8 @@ namespace sqsgenerator {
+                 iteration_ranks = compute_ranks(settings, threads_per_rank);
+             }
+             #pragma omp barrier
+-            auto [start_it, end_it] = iteration_ranks[mpi_rank][thread_id];
++            rank_t start_it, end_it;
++            std::tie(start_it, end_it) = iteration_ranks[mpi_rank][thread_id];
+             #pragma omp critical
+             {
+                 BOOST_LOG_TRIVIAL(debug) << "do_pair_iterations::rank::" << mpi_rank << "::thread::" << thread_id << "::iteration_start = " << start_it;
+@@ -346,16 +359,28 @@ namespace sqsgenerator {
+                     }
+ #endif
+                     // we do only an atomic read from the global shared variable in case the current is smaller than the thread internal
+-                    #pragma omp atomic read
+-                    best_objective_local = best_objective;
++                    #if defined(_WIN32) || defined(_WIN64)
++                        // MSCV2019 does not support "atomic" directive
++                        best_objective_local = best_objective;
++                    #else
++                        #pragma omp atomic read
++                        best_objective_local = best_objective;
++                    #endif
  
+                     SQSResult result(objective_local, {-1}, configuration_local, parameters_local);
+                     #pragma omp critical
+                     results.push_back(result);
+                     // synchronize writing to global best objective, only if the local one is really better
+                     if (objective_local < best_objective_local){
+-                        #pragma omp atomic write
+-                        best_objective = objective_local;
++                        #if defined(_WIN32) || defined(_WIN64)
++                            // MSCV2019 does not support "atomic" directive
++                            #pragma omp critical
++                            best_objective = objective_local;
++                        #else
++                            #pragma omp atomic write
++                            best_objective = objective_local;
++                        #endif
++
+                         best_objective_local = objective_local;
+ #if defined(USE_MPI)
+                         /*
+@@ -401,11 +426,20 @@ namespace sqsgenerator {
+         } // pragma omp parallel
  
-@@ -50,15 +49,15 @@
-     if isinstance(settings.mode, IterationMode):
-         return settings.mode
-     if settings.mode not in IterationMode.names:
--        raise BadSettings(f'Unknown iteration mode "{settings.mode}". '
--                          f'Available iteration modes are {list(IterationMode.names.keys())}')
-+        raise BadSettings('Unknown iteration mode "{}". '.format(settings.mode) +
-+                          'Available iteration modes are {}'.format(list(IterationMode.names.keys())))
-     return IterationMode.names[settings.mode]
+         // Restore the the old sigaction handler
+-        sigaction(SIGINT, &old_sigint_handler, NULL);
++        #if defined(_WIN32) || defined(_WIN64)
++            signal(SIGINT, old_sigint_handler);
++            signal(SIGABRT, old_sigabrt_handler);
++        #else
++            sigaction(SIGINT, &old_sigint_handler, NULL);
++        #endif
  
+ #if defined(USE_MPI)
+         // For the MPI-version we also have to restore the SIGTERM handler
+-        sigaction(SIGTERM, &old_sigterm_handler, NULL);
++        #if defined(_WIN32) || defined(_WIN64)
++            signal(SIGTERM, old_sigterm_handler);
++        #else
++            sigaction(SIGTERM, &old_sigterm_handler, NULL);
++        #endif
+ #endif
  
- @parameter('iterations', default=defaults.iterations, required=if_(random_mode)(True)(False))
- def read_iterations(settings: AttrDict):
-     num_iterations = convert(settings.iterations, converter=int_safe,
--                             message=f'Cannot convert "{settings.iterations}" to int')
-+                             message='Cannot convert "{}" to int'.format(settings.iterations))
-     if num_iterations < 0:
-         raise BadSettings('"iterations" must be positive')
-     return num_iterations
-@@ -67,7 +66,7 @@
- @parameter('max_output_configurations', default=defaults.max_output_configurations)
- def read_max_output_configurations(settings: AttrDict):
-     num_confs = convert(settings.max_output_configurations, converter=int_safe,
--                        message=f'Cannot convert "{settings.max_output_configurations}" to int')
-+                        message='Cannot convert "{}" to int'.format(settings.max_output_configurations))
-     if num_confs < 0:
-         raise BadSettings('"max_output_configurations" must be positive')
-     return num_confs
-@@ -103,10 +102,10 @@
-             species = list(s['species'])
-             structure = Structure(lattice, coords, species, (True, True, True))
-         else:
--            raise BadSettings(f'A structure dictionary needs the following fields {needed_fields}')
-+            raise BadSettings('A structure dictionary needs the following fields {}'.format(needed_fields))
+         if ((do_shutdown && shutdown_requested.load())) {
+diff --git a/sqsgenerator/core/src/utils.cpp b/sqsgenerator/core/src/utils.cpp
+index 76d35fa..4bb5cde 100644
+--- a/sqsgenerator/core/src/utils.cpp
++++ b/sqsgenerator/core/src/utils.cpp
+@@ -3,6 +3,12 @@
+ //
  
-     if structure is None:
--        raise BadSettings(f'Cannot read structure from the settings, "{type(s)}"')
-+        raise BadSettings('Cannot read structure from the settings, "{}"'.format(type(s)))
-     if isinstance(s, dict) and 'supercell' in s:
-         sizes = settings.structure.supercell
-         if len(sizes) != 3:
-@@ -124,8 +123,8 @@
-         sublattice = settings.which
-         allowed_sublattices = {'all', }.union(structure.unique_species)
-         if sublattice not in allowed_sublattices:
--            raise BadSettings(f'The structure does not have an "{sublattice}" sublattice. '
--                              f'Possible values would be {allowed_sublattices}')
-+            raise BadSettings('The structure does not have an "{}" sublattice. '.format(sublattice) +
-+                              'Possible values would be {}'.format(allowed_sublattices))
-         if sublattice == 'all':
-             mask = tuple(range(structure.num_atoms))
-         else:
-@@ -136,9 +135,9 @@
-         if len(sublattice) < 2:
-             raise BadSettings('You need to at least specify two different lattice positions to define a sublattice')
-         if not all(map(isa(int), sublattice)):
--            raise BadSettings(f'I do only understand integer lists to specify a sublattice')
-+            raise BadSettings('I do only understand integer lists to specify a sublattice')
-         if not all(map(lambda _: 0 <= _ < structure.num_atoms, sublattice)):
--            raise BadSettings(f'All indices in the list must be 0 <= index < {structure.num_atoms}')
-+            raise BadSettings('All indices in the list must be 0 <= index < {}'.format(structure.num_atoms))
-         which = tuple(settings.which)
-     else:
-         raise BadSettings('I do not understand your composition specification')
-@@ -150,7 +149,7 @@
- def read_composition(settings: AttrDict):
-     structure = settings.structure[settings.which]
-     if not isinstance(settings.composition, dict):
--        raise BadSettings(f'Cannot interpret "composition" settings. I expect a dictionary')
-+        raise BadSettings('Cannot interpret "composition" settings. I expect a dictionary')
+ #include "utils.hpp"
++#if defined(_WIN32) || defined(_WIN64)
++#include "uint128_t.h"
++#define UINT128_T uint128_t
++#else
++#define UINT128_T __uint128_t
++#endif
  
-     build_structure(settings.composition, structure)
-     return settings.composition
-@@ -167,7 +166,7 @@
-         raise BadSettings('You need to specify at least one shell-distance')
-     for distance in distances:
-         if distance < 0.0:
--            raise BadSettings(f'A distance can never be less than zero. You specified "{distance}"')
-+            raise BadSettings('A distance can never be less than zero. You specified "{}"'.format(distance))
-     sorted_distances = list(sorted(distances))
-     sorted_distances.insert(0, 0.0)
-     return sorted_distances
-@@ -182,14 +181,15 @@
-     allowed_indices = set(range(1, len(settings.shell_distances)))
+ namespace sqsgenerator::utils {
  
-     parsed_weights = {
--        convert(shell, to=int, message=f'A shell must be an integer. You specified {shell}'):
--            convert(weight, to=float, message=f'A weight must be a floating point number. You specified {weight}')
-+        convert(shell, to=int, message='A shell must be an integer. You specified {}'.format(shell)):
-+            convert(weight, to=float, message='A weight must be a floating point number. You specified {}'.format(weight))
-         for shell, weight in settings.shell_weights.items()
+@@ -46,10 +52,10 @@ namespace sqsgenerator::utils {
+     // Code taken from: https://github.com/lemire/testingRNG/blob/master/source/wyhash.h
+     static inline uint64_t wyhash64_stateless(uint64_t *seed) {
+         *seed += UINT64_C(0x60bee2bee120fc15);
+-        __uint128_t tmp;
+-        tmp = (__uint128_t)*seed * UINT64_C(0xa3b195354a39b70d);
++        UINT128_T tmp;
++        tmp = (UINT128_T)*seed * UINT64_C(0xa3b195354a39b70d);
+         uint64_t m1 = (tmp >> 64) ^ tmp;
+-        tmp = (__uint128_t)m1 * UINT64_C(0x1b03738712fad5c9);
++        tmp = (UINT128_T)m1 * UINT64_C(0x1b03738712fad5c9);
+         uint64_t m2 = (tmp >> 64) ^ tmp;
+         return m2;
      }
- 
-     for shell in parsed_weights.keys():
-         if shell not in allowed_indices:
--            raise BadSettings(f'The shell {shell} you specified is not allowed. Allowed values are {allowed_indices}')
-+            raise BadSettings('The shell {} you specified is not allowed. '
-+                              'Allowed values are {}'.format(shell, allowed_indices))
-     return settings.shell_weights
- 
- 
-@@ -202,13 +202,13 @@
-         if w.ndim in {2, 3}:
-             expected_shape = (nshells, nums, nums) if w.ndim == 3 else (nums, nums)
- 
--            ensure_array_shape(w, expected_shape, f'The 3D "{parameter_name}" you have specified '
--                                                  f'has a wrong shape ({w.shape}). Expected {expected_shape}')
--            ensure_array_symmetric(w, f'The "{parameter_name}" parameters are not symmetric')
-+            ensure_array_shape(w, expected_shape, 'The 3D "{}" you have specified '.format(parameter_name) +
-+                                                  'has a wrong shape ({}). Expected {}'.format(w.shape, expected_shape))
-+            ensure_array_symmetric(w, 'The "{}" parameters are not symmetric'.format(parameter_name))
-             return constructor(w)
- 
--    raise BadSettings(f'As "{parameter_name}" I do expect a {nums}x{nums} matrix, '
--                      f'since your structure contains {nums} different species')
-+    raise BadSettings('As "{}" I do expect a {}x{} matrix, '.format(parameter_name, nums, nums) +
-+                      'since your structure contains {} different species'.format(nums))
- 
- 
- @parameter('pair_weights', default=defaults.pair_weights, required=True)
-@@ -260,10 +260,10 @@
-     if isinstance(settings.threads_per_rank, (list, tuple, np.ndarray)):
-         if len(settings.threads_per_rank) != 1:
-             if not have_mpi_support():
--                raise BadSettings(f'The module sqsgenerator.core.iteration was not compiled with MPI support')
-+                raise BadSettings('The module sqsgenerator.core.iteration was not compiled with MPI support')
-         return list(map(converter, settings.threads_per_rank))
- 
--    raise BadSettings(f'Cannot interpret "threads_per_rank" setting.')
-+    raise BadSettings('Cannot interpret "threads_per_rank" setting.')
- 
- 
- def process_settings(settings: AttrDict, params: T.Optional[T.Set[str]] = None, ignore: T.Iterable[str]=()) -> AttrDict:
-Index: sqsgenerator/settings/__init__.py
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
-diff --git a/sqsgenerator/settings/__init__.py b/sqsgenerator/settings/__init__.py
---- a/sqsgenerator/settings/__init__.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
-+++ b/sqsgenerator/settings/__init__.py	(date 1647245261820)
-@@ -1,7 +1,7 @@
- 
- import typing as T
--from attrdict import AttrDict
- from sqsgenerator.core import IterationSettings
-+from sqsgenerator.fallback.attrdict import AttrDict
- from sqsgenerator.settings.defaults import defaults
- from sqsgenerator.settings.utils import build_structure
- from sqsgenerator.settings.exceptions import BadSettings
-Index: test/cli/bindings/test_structure.py
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
-diff --git a/test/cli/bindings/test_structure.py b/test/cli/bindings/test_structure.py
---- a/test/cli/bindings/test_structure.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
-+++ b/test/cli/bindings/test_structure.py	(date 1647253831924)
-@@ -59,9 +59,6 @@
-         with self.assertRaises(ValueError):
-             s.slice_with_species(['Fe'], [0, 1])
- 
--    def test_repr(self):
--        length = len(self.structure)
--        self.assertTrue(f'len={length}', repr(self.structure))
- 
- 
- if __name__ == '__main__':
-Index: test/cli/bindings/test_readers.py
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
-diff --git a/test/cli/bindings/test_readers.py b/test/cli/bindings/test_readers.py
---- a/test/cli/bindings/test_readers.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
-+++ b/test/cli/bindings/test_readers.py	(date 1647257018414)
-@@ -3,9 +3,9 @@
- import io
- import random
- import unittest
--import attrdict
- import numpy as np
- from sqsgenerator.compat import have_mpi_support
-+from sqsgenerator.fallback.attrdict import AttrDict
- from sqsgenerator.core import default_shell_distances
- from sqsgenerator.adapters import to_ase_atoms, to_pymatgen_structure
- from sqsgenerator.io import read_settings_file
-@@ -27,7 +27,7 @@
- 
- 
- def settings(recursive=True, **kwargs):
--    return attrdict.AttrDict({**kwargs}, recursive=recursive)
-+    return AttrDict({**kwargs}, recursive=recursive)
- 
- 
- def test_function(test_f):
-@@ -62,7 +62,7 @@
-         self.assertTrue(coords_close)
- 
-     def override_default(self, **kwargs):
--        cp = attrdict.AttrDict(self.processed.copy())
-+        cp = AttrDict(self.processed.copy())
-         cp.update(**kwargs)
-         return cp
- 
-Index: sqsgenerator/fallback/attrdict/mixins.py
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
+@@ -61,6 +67,7 @@ namespace sqsgenerator::utils {
+          uint64_t m = uint64_t(x) * uint64_t(range);
+          return m >> 32;
+     }
++
+     // Simple Knuth-Fisher-Yates shuffle with random generator
+     void shuffle_configuration_(configuration_t &configuration, uint64_t *seed) {
+         for (uint32_t i=configuration.size(); i > 1; i--) {
+diff --git a/sqsgenerator/fallback/__init__.py b/sqsgenerator/fallback/__init__.py
+new file mode 100644
+index 0000000..fd9c056
+--- /dev/null
++++ b/sqsgenerator/fallback/__init__.py
+@@ -0,0 +1,2 @@
++
++from sqsgenerator.fallback import attrdict
+\ No newline at end of file
+diff --git a/sqsgenerator/fallback/attrdict/__init__.py b/sqsgenerator/fallback/attrdict/__init__.py
+new file mode 100644
+index 0000000..4edd210
+--- /dev/null
++++ b/sqsgenerator/fallback/attrdict/__init__.py
+@@ -0,0 +1,7 @@
++"""
++attrdict contains several mapping objects that allow access to their
++keys as attributes.
++"""
++from sqsgenerator.fallback.attrdict.dictionary import AttrDict
++
++__all__ = ['AttrDict']
+diff --git a/sqsgenerator/fallback/attrdict/dictionary.py b/sqsgenerator/fallback/attrdict/dictionary.py
+new file mode 100644
+index 0000000..6dd23ac
+--- /dev/null
++++ b/sqsgenerator/fallback/attrdict/dictionary.py
+@@ -0,0 +1,59 @@
++"""
++A dict that implements MutableAttr.
++"""
++
++import six
++from sqsgenerator.fallback.attrdict.mixins import MutableAttr
++
++__all__ = ['AttrDict']
++
++
++class AttrDict(dict, MutableAttr):
++    """
++    A dict that implements MutableAttr.
++    """
++    def __init__(self, *args, **kwargs):
++        super(AttrDict, self).__init__(*args, **kwargs)
++
++        self._setattr('_sequence_type', tuple)
++        self._setattr('_allow_invalid_attributes', False)
++
++    def _configuration(self):
++        """
++        The configuration for an attrmap instance.
++        """
++        return self._sequence_type
++
++    def __getstate__(self):
++        """
++        Serialize the object.
++        """
++        return (
++            self.copy(),
++            self._sequence_type,
++            self._allow_invalid_attributes
++        )
++
++    def __setstate__(self, state):
++        """
++        Deserialize the object.
++        """
++        mapping, sequence_type, allow_invalid_attributes = state
++        self.update(mapping)
++        self._setattr('_sequence_type', sequence_type)
++        self._setattr('_allow_invalid_attributes', allow_invalid_attributes)
++
++    def __repr__(self):
++        return six.u('AttrDict({contents})').format(
++            contents=super(AttrDict, self).__repr__()
++        )
++
++    @classmethod
++    def _constructor(cls, mapping, configuration):
++        """
++        A standardized constructor.
++        """
++        attr = cls(mapping)
++        attr._setattr('_sequence_type', configuration)
++
++        return attr
+diff --git a/sqsgenerator/fallback/attrdict/merge.py b/sqsgenerator/fallback/attrdict/merge.py
+new file mode 100644
+index 0000000..7b35aca
+--- /dev/null
++++ b/sqsgenerator/fallback/attrdict/merge.py
+@@ -0,0 +1,48 @@
++
++"""
++A right-favoring Mapping merge.
++"""
++try:
++    from collections.abc import Mapping
++except ImportError:
++    from collections import Mapping
++
++
++__all__ = ['merge']
++
++
++def merge(left, right):
++    """
++    Merge two mappings objects together, combining overlapping Mappings,
++    and favoring right-values
++
++    left: The left Mapping object.
++    right: The right (favored) Mapping object.
++
++    NOTE: This is not commutative (merge(a,b) != merge(b,a)).
++    """
++    merged = {}
++
++    left_keys = frozenset(left)
++    right_keys = frozenset(right)
++
++    # Items only in the left Mapping
++    for key in left_keys - right_keys:
++        merged[key] = left[key]
++
++    # Items only in the right Mapping
++    for key in right_keys - left_keys:
++        merged[key] = right[key]
++
++    # in both
++    for key in left_keys & right_keys:
++        left_value = left[key]
++        right_value = right[key]
++
++        if (isinstance(left_value, Mapping) and
++                isinstance(right_value, Mapping)):  # recursive merge
++            merged[key] = merge(left_value, right_value)
++        else:  # overwrite with right value
++            merged[key] = right_value
++
++    return merged
+\ No newline at end of file
 diff --git a/sqsgenerator/fallback/attrdict/mixins.py b/sqsgenerator/fallback/attrdict/mixins.py
-new file mode 100755
---- /dev/null	(date 1647244850318)
-+++ b/sqsgenerator/fallback/attrdict/mixins.py	(date 1647244850318)
+new file mode 100644
+index 0000000..7276816
+--- /dev/null
++++ b/sqsgenerator/fallback/attrdict/mixins.py
 @@ -0,0 +1,212 @@
 +
 +"""
@@ -573,15 +1161,287 @@ new file mode 100755
 +                    cls=self.__class__.__name__
 +                )
 +            )
-Index: test/create_structure_utils_test_case.py
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
+diff --git a/sqsgenerator/io.py b/sqsgenerator/io.py
+index 3a7ad7d..a32bcb0 100644
+--- a/sqsgenerator/io.py
++++ b/sqsgenerator/io.py
+@@ -9,8 +9,8 @@ import zipfile
+ import functools
+ import numpy as np
+ import typing as T
+-from attrdict import AttrDict
+ from frozendict import frozendict
++from sqsgenerator.fallback.attrdict import AttrDict
+ from sqsgenerator.core import Structure, IterationMode
+ from sqsgenerator.compat import FeatureNotAvailableException
+ from operator import attrgetter as attr, methodcaller as method
+@@ -134,7 +134,8 @@ def dumps(o: dict, output_format: str = 'yaml') -> bytes:
+     """
+     f = F(output_format)
+     if not have_feature(f):
+-        raise FeatureNotAvailableException(f'The package "{format}" is not installed, consider to install it with')
++        raise FeatureNotAvailableException(f'The package "{format}" is not installed, '
++                                           'consider to install it with')
+ 
+     # for yaml format we create a simple wrapper which captures the output
+     def safe_dumps(d, **kwargs):
+@@ -171,7 +172,8 @@ def read_settings_file(path: str, format: str = 'yaml') -> AttrDict:
+         F.yaml: 'safe_load'
+     }
+     if not have_feature(f):
+-        raise FeatureNotAvailableException(f'The package "{format}" is not installed, consider to install it with')
++        raise FeatureNotAvailableException(f'The package "{format}" is not installed, '
++                                           'consider to install it with')
+     reader = getattr(get_module(f), readers[f])
+     try:
+         mode = 'r' if f != F.pickle else 'rb'
+@@ -250,7 +252,7 @@ def read_structure_from_file(settings: AttrDict) -> Structure:
+     reader = settings.structure.get('reader', 'ase')
+     available_readers = set(map(attr('value'), known_adapters))
+     if reader not in available_readers:
+-        raise FeatureNotAvailableException(f'Unknown reader specification "{reader}". '
++        raise FeatureNotAvailableException(f'Unknown reader specification "{reader}.  '
+                                            f'Available readers are {known_adapters}')
+     reader_kwargs = settings.structure.get('args', {})
+     reader_funcs = dict(ase=read_structure_file_with_ase, pymatgen=read_structure_file_with_pymatgen)
+diff --git a/sqsgenerator/public.py b/sqsgenerator/public.py
+index dc177ad..a7413ce 100644
+--- a/sqsgenerator/public.py
++++ b/sqsgenerator/public.py
+@@ -4,7 +4,7 @@ import warnings
+ import itertools
+ import numpy as np
+ import typing as T
+-from attrdict import AttrDict
++from sqsgenerator.fallback.attrdict import AttrDict
+ from operator import attrgetter as attr, itemgetter as item
+ from sqsgenerator.io import read_settings_file, export_structures
+ from sqsgenerator.settings import construct_settings, process_settings, defaults
+diff --git a/sqsgenerator/settings/__init__.py b/sqsgenerator/settings/__init__.py
+index a20b623..8dcf7a0 100644
+--- a/sqsgenerator/settings/__init__.py
++++ b/sqsgenerator/settings/__init__.py
+@@ -1,7 +1,7 @@
+ 
+ import typing as T
+-from attrdict import AttrDict
+ from sqsgenerator.core import IterationSettings
++from sqsgenerator.fallback.attrdict import AttrDict
+ from sqsgenerator.settings.defaults import defaults
+ from sqsgenerator.settings.utils import build_structure
+ from sqsgenerator.settings.exceptions import BadSettings
+diff --git a/sqsgenerator/settings/defaults.py b/sqsgenerator/settings/defaults.py
+index 993825f..9513c74 100644
+--- a/sqsgenerator/settings/defaults.py
++++ b/sqsgenerator/settings/defaults.py
+@@ -1,7 +1,8 @@
++
+ import collections
+ import numpy as np
+-from attrdict import AttrDict
+ from operator import itemgetter as item
++from sqsgenerator.fallback.attrdict import AttrDict
+ from sqsgenerator.settings.utils import build_structure, to_internal_composition_specs
+ from sqsgenerator.settings.functional import const, if_
+ from sqsgenerator.core import IterationMode, Structure, default_shell_distances as default_shell_distances_core, \
+diff --git a/sqsgenerator/settings/functional.py b/sqsgenerator/settings/functional.py
+index f9e91f7..d538ab1 100644
+--- a/sqsgenerator/settings/functional.py
++++ b/sqsgenerator/settings/functional.py
+@@ -1,20 +1,21 @@
+ import enum
+-import attrdict
+ import functools
+ import typing as T
+ from sqsgenerator.core import get_function_logger
++from sqsgenerator.fallback.attrdict import AttrDict
+ from sqsgenerator.settings.exceptions import BadSettings
+ 
+ 
+ class Default(enum.Enum):
+     """
+     Dummy Enum to represent "no default" value. ``None`` is not possible, since it is a legit default value, we
+-    use  ``Default.NoDfault``to prepresent no default value
++    use  ``Default.NoDfault``to represent no default value
+     """
+     NoDefault = 0
+ 
+ 
+-def parameter(name: str, default: T.Optional[T.Any] = Default.NoDefault, required: T.Union[T.Callable, bool]=True, key: T.Union[T.Callable, str] = None, registry: T.Optional[dict] = None):
++def parameter(name: str, default: T.Optional[T.Any] = Default.NoDefault, required: T.Union[T.Callable, bool] = True,
++              key: T.Union[T.Callable, str] = None, registry: T.Optional[dict] = None):
+     if key is None: key = name
+     get_required = lambda *_: required if isinstance(required, bool) else required
+     get_key = lambda *_: key if isinstance(key, str) else key
+@@ -24,7 +25,7 @@ def parameter(name: str, default: T.Optional[T.Any] = Default.NoDefault, require
+ 
+     def _decorator(f: T.Callable):
+         @functools.wraps(f)
+-        def _wrapped(settings: attrdict.AttrDict):
++        def _wrapped(settings: AttrDict):
+             is_required = get_required(settings)
+             k = get_key(settings)
+             nonlocal name
+diff --git a/sqsgenerator/settings/readers.py b/sqsgenerator/settings/readers.py
+index bb82fac..db5266e 100644
+--- a/sqsgenerator/settings/readers.py
++++ b/sqsgenerator/settings/readers.py
+@@ -11,9 +11,8 @@ import typing as T
+ import collections
+ import collections.abc
+ from functools import partial
+-from attrdict import AttrDict
+ from operator import itemgetter as item
+-
++from sqsgenerator.fallback.attrdict import AttrDict
+ from sqsgenerator.io import read_structure_from_file
+ from sqsgenerator.settings.exceptions import BadSettings
+ from sqsgenerator.core import IterationMode, Structure, make_supercell
+@@ -34,14 +33,14 @@ parameter = partial(parameter_, registry=__parameter_registry)
+ @parameter('atol', default=defaults.atol)
+ def read_atol(settings: AttrDict):
+     if not isinstance(settings.atol, float) or settings.atol < 0:
+-        raise BadSettings(f'The absolute tolerance can be only a positive floating point number')
++        raise BadSettings('The absolute tolerance can be only a positive floating point number')
+     return settings.atol
+ 
+ 
+ @parameter('rtol', default=defaults.rtol)
+ def read_rtol(settings: AttrDict):
+     if not isinstance(settings.rtol, float) or settings.rtol < 0:
+-        raise BadSettings(f'The relative tolerance can be only a positive floating point number')
++        raise BadSettings('The relative tolerance can be only a positive floating point number')
+     return settings.rtol
+ 
+ 
+@@ -136,7 +135,7 @@ def read_which(settings: AttrDict):
+         if len(sublattice) < 2:
+             raise BadSettings('You need to at least specify two different lattice positions to define a sublattice')
+         if not all(map(isa(int), sublattice)):
+-            raise BadSettings(f'I do only understand integer lists to specify a sublattice')
++            raise BadSettings('I do only understand integer lists to specify a sublattice')
+         if not all(map(lambda _: 0 <= _ < structure.num_atoms, sublattice)):
+             raise BadSettings(f'All indices in the list must be 0 <= index < {structure.num_atoms}')
+         which = tuple(settings.which)
+@@ -150,7 +149,7 @@ def read_which(settings: AttrDict):
+ def read_composition(settings: AttrDict):
+     structure = settings.structure[settings.which]
+     if not isinstance(settings.composition, dict):
+-        raise BadSettings(f'Cannot interpret "composition" settings. I expect a dictionary')
++        raise BadSettings('Cannot interpret "composition" settings. I expect a dictionary')
+ 
+     build_structure(settings.composition, structure)
+     return settings.composition
+@@ -260,10 +259,10 @@ def read_threads_per_rank(settings: AttrDict):
+     if isinstance(settings.threads_per_rank, (list, tuple, np.ndarray)):
+         if len(settings.threads_per_rank) != 1:
+             if not have_mpi_support():
+-                raise BadSettings(f'The module sqsgenerator.core.iteration was not compiled with MPI support')
++                raise BadSettings('The module sqsgenerator.core.iteration was not compiled with MPI support')
+         return list(map(converter, settings.threads_per_rank))
+ 
+-    raise BadSettings(f'Cannot interpret "threads_per_rank" setting.')
++    raise BadSettings('Cannot interpret "threads_per_rank" setting.')
+ 
+ 
+ def process_settings(settings: AttrDict, params: T.Optional[T.Set[str]] = None, ignore: T.Iterable[str]=()) -> AttrDict:
+diff --git a/sqsgenerator/settings/utils.py b/sqsgenerator/settings/utils.py
+index c8122f4..8634c6b 100644
+--- a/sqsgenerator/settings/utils.py
++++ b/sqsgenerator/settings/utils.py
+@@ -58,7 +58,7 @@ def to_internal_composition_specs(composition: dict, structure: Structure):
+             if k == 0:
+                 return k
+             else:
+-                raise BadSettings('I can only iterpret "0" as an atomic species')
++                raise BadSettings('I can only interpret "0" as an atomic species')
+         else:
+             return symbol_to_z(k)
+ 
+diff --git a/test/cli/bindings/test_readers.py b/test/cli/bindings/test_readers.py
+index e7b39df..314a3c1 100644
+--- a/test/cli/bindings/test_readers.py
++++ b/test/cli/bindings/test_readers.py
+@@ -3,9 +3,9 @@ import functools
+ import io
+ import random
+ import unittest
+-import attrdict
+ import numpy as np
+ from sqsgenerator.compat import have_mpi_support
++from sqsgenerator.fallback.attrdict import AttrDict
+ from sqsgenerator.core import default_shell_distances
+ from sqsgenerator.adapters import to_ase_atoms, to_pymatgen_structure
+ from sqsgenerator.io import read_settings_file
+@@ -27,7 +27,7 @@ from sqsgenerator.settings.readers import read_atol, \
+ 
+ 
+ def settings(recursive=True, **kwargs):
+-    return attrdict.AttrDict({**kwargs}, recursive=recursive)
++    return AttrDict({**kwargs}, recursive=recursive)
+ 
+ 
+ def test_function(test_f):
+@@ -62,7 +62,7 @@ class TestSettingReaders(unittest.TestCase):
+         self.assertTrue(coords_close)
+ 
+     def override_default(self, **kwargs):
+-        cp = attrdict.AttrDict(self.processed.copy())
++        cp = AttrDict(self.processed.copy())
+         cp.update(**kwargs)
+         return cp
+ 
+diff --git a/test/cli/bindings/test_structure.py b/test/cli/bindings/test_structure.py
+index 8e20182..b4b64d3 100644
+--- a/test/cli/bindings/test_structure.py
++++ b/test/cli/bindings/test_structure.py
+@@ -59,9 +59,6 @@ class TestStructure(unittest.TestCase):
+         with self.assertRaises(ValueError):
+             s.slice_with_species(['Fe'], [0, 1])
+ 
+-    def test_repr(self):
+-        length = len(self.structure)
+-        self.assertTrue(f'len={length}', repr(self.structure))
+ 
+ 
+ if __name__ == '__main__':
+diff --git a/test/cli/test_command_run.py b/test/cli/test_command_run.py
+index d71f00c..1a2445c 100644
+--- a/test/cli/test_command_run.py
++++ b/test/cli/test_command_run.py
+@@ -46,7 +46,7 @@ class TestRunIterationCommand(unittest.TestCase):
+         for compression in compression_to_file_extension.keys():
+ 
+             r = self.cli_runner.invoke(cli, ['run', 'iteration', '--export', '--no-minimal', '--similar', '--compress', compression])
+-            archive_name = f'sqs.{compression_to_file_extension.get(compression)}'
++            archive_name = 'sqs.{}'.format(compression_to_file_extension.get(compression))
+ 
+             if r.exit_code != 0:
+                 print(r.output, r.exit_code, r.stderr)
+@@ -57,7 +57,8 @@ class TestRunIterationCommand(unittest.TestCase):
+     @inject_config_file()
+     def test_analyse_command(self):
+         result_file = 'sqs.result.yaml'
+-        r = self.cli_runner.invoke(cli, ['run', 'iteration', '--export', '--no-minimal', '--similar', '--dump-include', 'parameters', '--dump-include', 'objective'])
++        r = self.cli_runner.invoke(cli, ['run', 'iteration', '--export', '--no-minimal', '--similar', '--dump-include',
++                                         'parameters', '--dump-include', 'objective'])
+         self.assertTrue(os.path.exists(result_file))
+         self.assertEqual(r.exit_code, 0)
+ 
+@@ -77,7 +78,7 @@ class TestRunIterationCommand(unittest.TestCase):
+ 
+         for k in results_from_analyse.keys():
+             iteration, analyse = results_from_iteration[k], results_from_analyse[k]
+-            # self.assertAlmostEqual(iteration['objective'], analyse['objective'])
++
+             self.assertListEqual(iteration['configuration'], analyse['configuration'])
+             np.testing.assert_array_almost_equal(iteration['parameters'], analyse['parameters'])
+ 
 diff --git a/test/create_structure_utils_test_case.py b/test/create_structure_utils_test_case.py
---- a/test/create_structure_utils_test_case.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
-+++ b/test/create_structure_utils_test_case.py	(date 1647253146350)
-@@ -8,13 +8,13 @@
+index 8300efd..aa58ab4 100644
+--- a/test/create_structure_utils_test_case.py
++++ b/test/create_structure_utils_test_case.py
+@@ -8,13 +8,13 @@ from pymatgen.io.vasp import Poscar
  from pymatgen.util.coord import pbc_shortest_vectors
  
  def write_array(stream, array: np.ndarray, name=None, fmt="{0:.8f}"):
@@ -600,554 +1460,3 @@ diff --git a/test/create_structure_utils_test_case.py b/test/create_structure_ut
  
  
  def nditer(A: np.ndarray):
-Index: sqsgenerator/fallback/attrdict/merge.py
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
-diff --git a/sqsgenerator/fallback/attrdict/merge.py b/sqsgenerator/fallback/attrdict/merge.py
-new file mode 100755
---- /dev/null	(date 1647244813845)
-+++ b/sqsgenerator/fallback/attrdict/merge.py	(date 1647244813845)
-@@ -0,0 +1,48 @@
-+
-+"""
-+A right-favoring Mapping merge.
-+"""
-+try:
-+    from collections.abc import Mapping
-+except ImportError:
-+    from collections import Mapping
-+
-+
-+__all__ = ['merge']
-+
-+
-+def merge(left, right):
-+    """
-+    Merge two mappings objects together, combining overlapping Mappings,
-+    and favoring right-values
-+
-+    left: The left Mapping object.
-+    right: The right (favored) Mapping object.
-+
-+    NOTE: This is not commutative (merge(a,b) != merge(b,a)).
-+    """
-+    merged = {}
-+
-+    left_keys = frozenset(left)
-+    right_keys = frozenset(right)
-+
-+    # Items only in the left Mapping
-+    for key in left_keys - right_keys:
-+        merged[key] = left[key]
-+
-+    # Items only in the right Mapping
-+    for key in right_keys - left_keys:
-+        merged[key] = right[key]
-+
-+    # in both
-+    for key in left_keys & right_keys:
-+        left_value = left[key]
-+        right_value = right[key]
-+
-+        if (isinstance(left_value, Mapping) and
-+                isinstance(right_value, Mapping)):  # recursive merge
-+            merged[key] = merge(left_value, right_value)
-+        else:  # overwrite with right value
-+            merged[key] = right_value
-+
-+    return merged
-\ No newline at end of file
-Index: sqsgenerator/public.py
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
-diff --git a/sqsgenerator/public.py b/sqsgenerator/public.py
---- a/sqsgenerator/public.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
-+++ b/sqsgenerator/public.py	(date 1647245221390)
-@@ -4,7 +4,7 @@
- import itertools
- import numpy as np
- import typing as T
--from attrdict import AttrDict
-+from sqsgenerator.fallback.attrdict import AttrDict
- from operator import attrgetter as attr, itemgetter as item
- from sqsgenerator.io import read_settings_file, export_structures
- from sqsgenerator.settings import construct_settings, process_settings, defaults
-Index: sqsgenerator/io.py
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
-diff --git a/sqsgenerator/io.py b/sqsgenerator/io.py
---- a/sqsgenerator/io.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
-+++ b/sqsgenerator/io.py	(date 1647259876595)
-@@ -9,8 +9,8 @@
- import functools
- import numpy as np
- import typing as T
--from attrdict import AttrDict
- from frozendict import frozendict
-+from sqsgenerator.fallback.attrdict import AttrDict
- from sqsgenerator.core import Structure, IterationMode
- from sqsgenerator.compat import FeatureNotAvailableException
- from operator import attrgetter as attr, methodcaller as method
-@@ -134,7 +134,8 @@
-     """
-     f = F(output_format)
-     if not have_feature(f):
--        raise FeatureNotAvailableException(f'The package "{format}" is not installed, consider to install it with')
-+        raise FeatureNotAvailableException(f'The package "{format}" is not installed, '
-+                                           'consider to install it with')
- 
-     # for yaml format we create a simple wrapper which captures the output
-     def safe_dumps(d, **kwargs):
-@@ -171,7 +172,8 @@
-         F.yaml: 'safe_load'
-     }
-     if not have_feature(f):
--        raise FeatureNotAvailableException(f'The package "{format}" is not installed, consider to install it with')
-+        raise FeatureNotAvailableException(f'The package "{format}" is not installed, '
-+                                           'consider to install it with')
-     reader = getattr(get_module(f), readers[f])
-     try:
-         mode = 'r' if f != F.pickle else 'rb'
-@@ -250,7 +252,7 @@
-     reader = settings.structure.get('reader', 'ase')
-     available_readers = set(map(attr('value'), known_adapters))
-     if reader not in available_readers:
--        raise FeatureNotAvailableException(f'Unknown reader specification "{reader}". '
-+        raise FeatureNotAvailableException(f'Unknown reader specification "{reader}.  '
-                                            f'Available readers are {known_adapters}')
-     reader_kwargs = settings.structure.get('args', {})
-     reader_funcs = dict(ase=read_structure_file_with_ase, pymatgen=read_structure_file_with_pymatgen)
-Index: sqsgenerator/fallback/attrdict/dictionary.py
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
-diff --git a/sqsgenerator/fallback/attrdict/dictionary.py b/sqsgenerator/fallback/attrdict/dictionary.py
-new file mode 100755
---- /dev/null	(date 1647244531834)
-+++ b/sqsgenerator/fallback/attrdict/dictionary.py	(date 1647244531834)
-@@ -0,0 +1,59 @@
-+"""
-+A dict that implements MutableAttr.
-+"""
-+
-+import six
-+from sqsgenerator.fallback.attrdict.mixins import MutableAttr
-+
-+__all__ = ['AttrDict']
-+
-+
-+class AttrDict(dict, MutableAttr):
-+    """
-+    A dict that implements MutableAttr.
-+    """
-+    def __init__(self, *args, **kwargs):
-+        super(AttrDict, self).__init__(*args, **kwargs)
-+
-+        self._setattr('_sequence_type', tuple)
-+        self._setattr('_allow_invalid_attributes', False)
-+
-+    def _configuration(self):
-+        """
-+        The configuration for an attrmap instance.
-+        """
-+        return self._sequence_type
-+
-+    def __getstate__(self):
-+        """
-+        Serialize the object.
-+        """
-+        return (
-+            self.copy(),
-+            self._sequence_type,
-+            self._allow_invalid_attributes
-+        )
-+
-+    def __setstate__(self, state):
-+        """
-+        Deserialize the object.
-+        """
-+        mapping, sequence_type, allow_invalid_attributes = state
-+        self.update(mapping)
-+        self._setattr('_sequence_type', sequence_type)
-+        self._setattr('_allow_invalid_attributes', allow_invalid_attributes)
-+
-+    def __repr__(self):
-+        return six.u('AttrDict({contents})').format(
-+            contents=super(AttrDict, self).__repr__()
-+        )
-+
-+    @classmethod
-+    def _constructor(cls, mapping, configuration):
-+        """
-+        A standardized constructor.
-+        """
-+        attr = cls(mapping)
-+        attr._setattr('_sequence_type', configuration)
-+
-+        return attr
-Index: sqsgenerator/core/structure.py
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
-diff --git a/sqsgenerator/core/structure.py b/sqsgenerator/core/structure.py
---- a/sqsgenerator/core/structure.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
-+++ b/sqsgenerator/core/structure.py	(date 1647253594373)
-@@ -98,10 +98,10 @@
-         def group_symbols():
-             for species, same in itertools.groupby(self._symbols):
-                 num_same = len(list(same))
--                yield species if num_same == 1 else f'{species}{num_same}'
-+                yield species if num_same == 1 else '{}{}'.format(species, num_same)
- 
-         formula = ''.join(group_symbols())
--        return f'Structure({formula}, len={self.num_atoms})'
-+        return 'Structure({}, len={})'.format(formula, self.num_atoms)
- 
-     def __eq__(self, other):
-         if not isinstance(other, Structure):
-@@ -139,7 +139,7 @@
-         elif isinstance(item, slice):
-             indices = np.arange(self.num_atoms)[item]
-         else:
--            raise TypeError(f'Structure indices must not be of type {type(item)}')
-+            raise TypeError('Structure indices must not be of type {}'.format(type(item)))
-         return Structure(self.lattice, self.frac_coords[indices], self.symbols[indices])
- 
-     def to_dict(self) -> dict:
-Index: sqsgenerator/compat.py
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
-diff --git a/sqsgenerator/compat.py b/sqsgenerator/compat.py
---- a/sqsgenerator/compat.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
-+++ b/sqsgenerator/compat.py	(date 1647259876480)
-@@ -54,13 +54,13 @@
-             getter = functools.partial(operator.itemgetter(feat.value), __features)
-             setattr(self_module, f'have_{feat.value}', getter)
-             message = f'Feature "{feat.value}" was ' + ('found' if __features[feat.value] else 'not found')
--            logging.getLogger(f'compat.check_features').info(message)
-+            logging.getLogger('compat.check_features').info(message)
- 
- 
- def have_feature(feature: T.Union[Feature, str]) -> bool:
-     assert is_initialized()
--    freature_value = feature.value if isinstance(feature, Feature) else feature
--    return freature_value in __features and __features[freature_value]
-+    feature_value = feature.value if isinstance(feature, Feature) else feature
-+    return feature_value in __features and __features[feature_value]
- 
- 
- def require(*features: Feature, condition=all):
-@@ -70,8 +70,11 @@
- 
-         @functools.wraps(f)
-         def _wrapper(*args, **kwargs):
--            if not condition(map(have_feature, features)): raise FeatureNotAvailableException(features)
-+            if not condition(map(have_feature, features)):
-+                raise FeatureNotAvailableException(features)
-+
-             return f(*args, **kwargs)
-+
-         return _wrapper
- 
-     return _decorator
-@@ -87,7 +90,9 @@
- 
- 
- def available_features_with_version():
--    default_version = lambda _ : ''
-+
-+    def default_version(*_):
-+        return ''
- 
-     def module_version_attr(f):
-         feature = Feature(f)
-Index: sqsgenerator/cli.py
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
-diff --git a/sqsgenerator/cli.py b/sqsgenerator/cli.py
---- a/sqsgenerator/cli.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
-+++ b/sqsgenerator/cli.py	(date 1647260126796)
-@@ -12,12 +12,12 @@
- 
- def make_version_string():
-     major, minor, *_ = __version__
--    return f'{major}.{minor}'
-+    return '%i.%i' % (major, minor)
- 
- 
- def make_repo_status():
-     _, _, commit, branch = __version__
--    return f'{commit}@{branch}'
-+    return '%s@%s' % (commit, branch)
- 
- 
- _title = '[bold]sqsgenerator[/bold] - A CLI tool to find optimized SQS structures'
-Index: setup.py
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
-diff --git a/setup.py b/setup.py
---- a/setup.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
-+++ b/setup.py	(date 1647257109244)
-@@ -63,20 +63,20 @@
-             extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
-             cfg = 'Debug' if ext.debug else 'Release'
-             cmake_args = [
--                f'-DCMAKE_BUILD_TYPE={cfg}',
-+                '-DCMAKE_BUILD_TYPE={}'.format(cfg),
-                 # Ask CMake to place the resulting library in the directory
-                 # containing the extension
--                f'-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{cfg.upper()}={extdir}',
-+                '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}'.format(cfg.upper(), extdir),
-                 # Other intermediate static libraries are placed in a
-                 # temporary build directory instead
--                f'-DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_{cfg.upper()}={self.build_temp}',
-+                '-DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_{}={}'.format(cfg.upper(), self.build_temp),
-                 # Hint CMake to use the same Python executable that
-                 # is launching the build, prevents possible mismatching if
-                 # multiple versions of Python are installed
-                 '-DPython3_EXECUTABLE={}'.format(sys.executable),
-                 # Add other project-specific CMake arguments if needed
-                 # ...
--                f'-DUSE_MPI={"ON" if self.with_mpi else "OFF"}',
-+                '-DUSE_MPI={}'.format("ON" if self.with_mpi else "OFF"),
-                 # '-DCMAKE_CXX_FLAGS_{}={}'.format(cfg.upper(),  )
-             ]
-             cmake_cxx_flags = ' '.join(opt_flags.get(cfg, {}).get(self.compiler.compiler_type, []))
-@@ -86,13 +86,13 @@
-             for env_var_name, env_var_value in os.environ.items():
-                 if env_var_name == 'CMAKE_CXX_FLAGS':
-                     # we append them to our release/debug flags
--                    cmake_cxx_flags += f' {env_var_value}'
-+                    cmake_cxx_flags += ' {}'.format(env_var_value)
-                 elif env_var_name.startswith('CMAKE'):
--                    cmake_args.append(f'-D{env_var_name}={env_var_value}')
--                m = re.match(f'{env_var_prefix}(?P<varname>\w+)', env_var_name)
-+                    cmake_args.append('-D{}={}'.format(env_var_name, env_var_value))
-+                m = re.match('{}(?P<varname>\w+)'.format(env_var_prefix), env_var_name)
-                 if m:
-                     env_var_name_real = m.groupdict()['varname']
--                    cmake_args.append(f'-D{env_var_name_real}={env_var_value}')
-+                    cmake_args.append('-D{}={}'.format(env_var_name_real, env_var_value))
- 
-             cmake_args.append('-DCMAKE_CXX_FLAGS_{}={}'.format(cfg.upper(), cmake_cxx_flags))
-             pprint.pprint(cmake_args)
-@@ -107,7 +107,7 @@
-                 # Assuming that Visual Studio and MinGW are supported compilers
-                 if self.compiler.compiler_type == 'msvc':
-                     cmake_args += [
--                        f'-DCMAKE_GENERATOR_PLATFORM={plat}'
-+                        '-DCMAKE_GENERATOR_PLATFORM={}'.format(plat)
-                     ]
-                 else:
-                     cmake_args += [
-@@ -143,7 +143,7 @@
-         'build_ext': CMakeBuildExt,
-         'install': InstallCustom
-     },
--    install_requires=['attrdict', 'numpy', 'click', 'rich>=9.11.0', 'pyyaml', 'frozendict'],
-+    install_requires=['numpy', 'click', 'rich>=9.11.0', 'pyyaml', 'frozendict'],
-     entry_points={
-         'console_scripts': ['sqsgen=sqsgenerator.cli:cli']
-     },
-Index: sqsgenerator/core/src/sqs.cpp
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
-diff --git a/sqsgenerator/core/src/sqs.cpp b/sqsgenerator/core/src/sqs.cpp
---- a/sqsgenerator/core/src/sqs.cpp	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
-+++ b/sqsgenerator/core/src/sqs.cpp	(date 1647084580930)
-@@ -122,8 +122,9 @@
- 
-     std::vector<size_t> convert_pair_list(const std::vector<AtomPair> &pair_list) {
-         std::vector<size_t> result;
-+        pair_shell_matrix_t::index i, j, _, shell_index;
-         for (const auto &pair : pair_list) {
--            auto[i, j, _, shell_index] = pair;
-+            std::tie(i, j, _, shell_index) = pair;
-             result.push_back(i);
-             result.push_back(j);
-             result.push_back(shell_index);
-@@ -277,7 +278,8 @@
-                 iteration_ranks = compute_ranks(settings, threads_per_rank);
-             }
-             #pragma omp barrier
--            auto [start_it, end_it] = iteration_ranks[mpi_rank][thread_id];
-+            rank_t start_it, end_it;
-+            std::tie(start_it, end_it) = iteration_ranks[mpi_rank][thread_id];
-             #pragma omp critical
-             {
-                 BOOST_LOG_TRIVIAL(debug) << "do_pair_iterations::rank::" << mpi_rank << "::thread::" << thread_id << "::iteration_start = " << start_it;
-Index: sqsgenerator/fallback/attrdict/__init__.py
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
-diff --git a/sqsgenerator/fallback/attrdict/__init__.py b/sqsgenerator/fallback/attrdict/__init__.py
-new file mode 100755
---- /dev/null	(date 1647244531724)
-+++ b/sqsgenerator/fallback/attrdict/__init__.py	(date 1647244531724)
-@@ -0,0 +1,7 @@
-+"""
-+attrdict contains several mapping objects that allow access to their
-+keys as attributes.
-+"""
-+from sqsgenerator.fallback.attrdict.dictionary import AttrDict
-+
-+__all__ = ['AttrDict']
-Index: sqsgenerator/fallback/__init__.py
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
-diff --git a/sqsgenerator/fallback/__init__.py b/sqsgenerator/fallback/__init__.py
-new file mode 100755
---- /dev/null	(date 1647251154904)
-+++ b/sqsgenerator/fallback/__init__.py	(date 1647251154904)
-@@ -0,0 +1,2 @@
-+
-+from sqsgenerator.fallback import attrdict
-\ No newline at end of file
-Index: sqsgenerator/core/include/structure_utils.hpp
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
-diff --git a/sqsgenerator/core/include/structure_utils.hpp b/sqsgenerator/core/include/structure_utils.hpp
---- a/sqsgenerator/core/include/structure_utils.hpp	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
-+++ b/sqsgenerator/core/include/structure_utils.hpp	(date 1647083609903)
-@@ -8,6 +8,7 @@
- 
- #include "types.hpp"
- #include "utils.hpp"
-+#include <set>
- #include <vector>
- #include <limits>
- #include <algorithm>
-Index: sqsgenerator/core/include/utils.hpp
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
-diff --git a/sqsgenerator/core/include/utils.hpp b/sqsgenerator/core/include/utils.hpp
---- a/sqsgenerator/core/include/utils.hpp	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
-+++ b/sqsgenerator/core/include/utils.hpp	(date 1647083609906)
-@@ -6,6 +6,7 @@
- #define SQSGENERATOR_UTILS_HPP
- 
- #include "types.hpp"
-+#include <set>
- #include <sstream>
- #include <stdexcept>
- #include <boost/multi_array.hpp>
-Index: sqsgenerator/core/include/types.hpp
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
-diff --git a/sqsgenerator/core/include/types.hpp b/sqsgenerator/core/include/types.hpp
---- a/sqsgenerator/core/include/types.hpp	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
-+++ b/sqsgenerator/core/include/types.hpp	(date 1647084580929)
-@@ -54,7 +54,7 @@
-     using Shape = std::array<size_t, NDims>;
- 
-     // The array consists of {size_t i, size_t j, size_t shell, size_t shell_index}
--    typedef std::array<pair_shell_matrix_t::index, 4> AtomPair;
-+    typedef std::tuple<pair_shell_matrix_t::index, pair_shell_matrix_t::index, pair_shell_matrix_t::index, pair_shell_matrix_t::index> AtomPair;
- 
-     constexpr species_t ALL_SITES = -1;
- }
-Index: sqsgenerator/commands/help.py
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
-diff --git a/sqsgenerator/commands/help.py b/sqsgenerator/commands/help.py
---- a/sqsgenerator/commands/help.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
-+++ b/sqsgenerator/commands/help.py	(date 1647259370373)
-@@ -2,8 +2,8 @@
- A data file storing the CLI's help strings
- """
- 
--from attrdict import AttrDict
- from sqsgenerator.io import default_adapter
-+from sqsgenerator.fallback.attrdict import AttrDict
- 
- 
- command_help = AttrDict(dict(
-Index: sqsgenerator/commands/common.py
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
-diff --git a/sqsgenerator/commands/common.py b/sqsgenerator/commands/common.py
---- a/sqsgenerator/commands/common.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
-+++ b/sqsgenerator/commands/common.py	(date 1647259136548)
-@@ -78,7 +78,7 @@
- 
- def exit_on_input_parameter_error(f):
-     """
--    Decorator: Wraps a @parameter decorated function -> catches a eventual `BadSettings` error -> creates a help-link
-+    Decorator: Wraps a @parameter decorated function -> catches an eventual `BadSettings` error -> creates a help-link
-     for the parameter -> redirects the `BadSettings` into `click.Abort` to stop CLI execution
-     """
- 
-@@ -100,7 +100,7 @@
- 
- def click_settings_file(process=None, default_name='sqs.yaml', ignore=()):
-     """
--    Decorator-Factory: A lot of the commands need an input YAML file -> creates a a decorator which parses a settings
-+    Decorator-Factory: A lot of the commands need an input YAML file -> creates a decorator which parses a settings
-     file and takes an input format as parameter. The decorator processes the specified file
-     :param process: process (parsed) the settings dictionary with sqsgenerator.core (default is `None`)
-     :type process: Iterable[str] or None
-Index: test/cli/test_command_run.py
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
-diff --git a/test/cli/test_command_run.py b/test/cli/test_command_run.py
---- a/test/cli/test_command_run.py	(revision e609a5771d1cfd5a7ad275dc48d249abd71d6a8d)
-+++ b/test/cli/test_command_run.py	(date 1647260010067)
-@@ -46,7 +46,7 @@
-         for compression in compression_to_file_extension.keys():
- 
-             r = self.cli_runner.invoke(cli, ['run', 'iteration', '--export', '--no-minimal', '--similar', '--compress', compression])
--            archive_name = f'sqs.{compression_to_file_extension.get(compression)}'
-+            archive_name = 'sqs.{}'.format(compression_to_file_extension.get(compression))
- 
-             if r.exit_code != 0:
-                 print(r.output, r.exit_code, r.stderr)
-@@ -57,7 +57,8 @@
-     @inject_config_file()
-     def test_analyse_command(self):
-         result_file = 'sqs.result.yaml'
--        r = self.cli_runner.invoke(cli, ['run', 'iteration', '--export', '--no-minimal', '--similar', '--dump-include', 'parameters', '--dump-include', 'objective'])
-+        r = self.cli_runner.invoke(cli, ['run', 'iteration', '--export', '--no-minimal', '--similar', '--dump-include',
-+                                         'parameters', '--dump-include', 'objective'])
-         self.assertTrue(os.path.exists(result_file))
-         self.assertEqual(r.exit_code, 0)
- 
-@@ -77,7 +78,7 @@
- 
-         for k in results_from_analyse.keys():
-             iteration, analyse = results_from_iteration[k], results_from_analyse[k]
--            # self.assertAlmostEqual(iteration['objective'], analyse['objective'])
-+
-             self.assertListEqual(iteration['configuration'], analyse['configuration'])
-             np.testing.assert_array_almost_equal(iteration['parameters'], analyse['parameters'])
- 
