@@ -12,12 +12,13 @@ source:
     - clang.patch
 
 build:
-  number: 6
+  number: 7
   entry_points:
      - sqsgen = sqsgenerator.cli:cli
   script_env:
-    - CMAKE_CXX_FLAGS=/MD /Zc:twoPhase- /DBOOST_PYTHON_STATIC_LIB /DBOOST_NUMPY_STATIC_LIB  # [win and py<=38]
-    - CMAKE_CXX_FLAGS=/MD /Zc:twoPhase- /DBOOST_PYTHON_STATIC_LIB /DBOOST_NUMPY_STATIC_LIB /DHAVE_SNPRINTF  # [win and py>=39]
+    - CMAKE_CXX_FLAGS=-O2 -DNDEBUG  # [not win]
+    - CMAKE_CXX_FLAGS=/O2 /DNDEBUG /MD /Zc:twoPhase- /DBOOST_PYTHON_STATIC_LIB /DBOOST_NUMPY_STATIC_LIB  # [win and py<=38]
+    - CMAKE_CXX_FLAGS=/O2 /DNDEBUG /MD /Zc:twoPhase- /DBOOST_PYTHON_STATIC_LIB /DBOOST_NUMPY_STATIC_LIB /DHAVE_SNPRINTF  # [win and py>=39]
     - SQS_CMAKE_VERBOSE_MAKEFILE=ON  # [win]
     - SQS_FORWARD_WHITELIST=CMAKE_PREFIX_PATH  # [win]
     - SQS_CMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL  # [win]
