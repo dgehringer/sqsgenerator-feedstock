@@ -8,8 +8,6 @@ package:
 source:
   url: https://github.com/dgehringer/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
   sha256: 983e20a97203b37dc4d21850e1a9693023cb1516bf543f645cbbac198a84f23c
-  patches:
-    - clang.patch
 
 build:
   number: 0
@@ -76,7 +74,7 @@ about:
   license: MIT
   license_family: MIT
   license_file: LICENSE
-  summary: A command line tool written in Python/C++ for finding optimized SQS structures
+  summary: A command line tool written in Python/C++ to analyse short-range order or generate SQS structures
 
   description: |
     This package is a Special Quasirandom Structure generator written 
