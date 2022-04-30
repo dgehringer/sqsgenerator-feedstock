@@ -1,5 +1,5 @@
 {% set name = "sqsgenerator" %}
-{% set version = "0.1" %}
+{% set version = "0.2" %}
 
 package:
   name: {{ name|lower }}
@@ -7,14 +7,12 @@ package:
 
 source:
   url: https://github.com/dgehringer/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: feca0e549d0084fbc96b00afda8035c38fbcb09c1825780025af4c7954da890c
-  patches:
-    - clang.patch
+  sha256: 983e20a97203b37dc4d21850e1a9693023cb1516bf543f645cbbac198a84f23c
 
 build:
-  number: 7
+  number: 0
   entry_points:
-     - sqsgen = sqsgenerator.cli:cli
+    - sqsgen = sqsgenerator.cli:cli
   script_env:
     - CMAKE_CXX_FLAGS=-O2 -DNDEBUG  # [not win]
     - CMAKE_CXX_FLAGS=/O2 /DNDEBUG /MD /Zc:twoPhase- /DBOOST_PYTHON_STATIC_LIB /DBOOST_NUMPY_STATIC_LIB  # [win and py<=38]
@@ -76,7 +74,7 @@ about:
   license: MIT
   license_family: MIT
   license_file: LICENSE
-  summary: A command line tool written in Python/C++ for finding optimized SQS structures
+  summary: A command line tool written in Python/C++ to analyse short-range order or generate SQS structures
 
   description: |
     This package is a Special Quasirandom Structure generator written 
