@@ -7,7 +7,7 @@ Package license: MIT
 
 Feedstock license: [BSD-3-Clause](https://github.com/conda-forge/sqsgenerator-feedstock/blob/main/LICENSE.txt)
 
-Summary: A command line tool written in Python/C++ for finding optimized SQS structures
+Summary: A command line tool written in Python/C++ to analyse short-range order or generate SQS structures
 
 Development: https://github.com/dgehringer/sqsgenerator
 
