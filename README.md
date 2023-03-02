@@ -1,11 +1,11 @@
-About sqsgenerator
-==================
+About sqsgenerator-feedstock
+============================
+
+Feedstock license: [BSD-3-Clause](https://github.com/conda-forge/sqsgenerator-feedstock/blob/main/LICENSE.txt)
 
 Home: https://github.com/dgehringer/sqsgenerator
 
 Package license: MIT
-
-Feedstock license: [BSD-3-Clause](https://github.com/conda-forge/sqsgenerator-feedstock/blob/main/LICENSE.txt)
 
 Summary: A command line tool written in Python/C++ to analyse short-range order or generate SQS structures
 
