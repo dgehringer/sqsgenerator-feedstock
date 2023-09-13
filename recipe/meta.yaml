@@ -35,7 +35,7 @@ requirements:
     - python
     - boost
     - boost-cpp
-    - libcxx<16      # [osx]
+    - libcxx <16      # [osx]
     - llvm-openmp    # [osx]
     - libgomp        # [linux]
     - {{ compiler('cxx') }}
@@ -50,6 +50,7 @@ requirements:
     - boost-cpp
     - llvm-openmp  # [osx]
     - libgomp      # [linux]
+    - libcxx <16  # [osx]
   run:
     - pip
     - six
@@ -64,6 +65,7 @@ requirements:
     - {{ pin_compatible('numpy') }}
     - {{ pin_compatible('boost') }}
     - {{ pin_compatible('boost-cpp') }}
+    - {{ pin_compatible('libcxx', min_pin='x.x', max_pin='x.x') }}  # [osx]
 
 test:
   imports:
