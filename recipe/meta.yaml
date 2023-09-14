@@ -1,5 +1,5 @@
 {% set name = "sqsgenerator" %}
-{% set version = "0.2" %}
+{% set version = "0.3" %}
 
 package:
   name: {{ name|lower }}
@@ -7,15 +7,15 @@ package:
 
 source:
   url: https://github.com/dgehringer/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: 983e20a97203b37dc4d21850e1a9693023cb1516bf543f645cbbac198a84f23c
+  sha256: 6bd8299e50860d47cdec99809e006b5caa5c4c9774fe189b85374ebd2bbf88ba
 
 build:
-  number: 6
+  number: 0
   entry_points:
     - sqsgen = sqsgenerator.cli:cli
   script_env:
     - CMAKE_CXX_FLAGS=-O2 -DNDEBUG  # [not win]
-    - CMAKE_CXX_FLAGS=-O2 -DNDEBUG  -DBOOST_NO_CXX98_FUNCTION_BASE -D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY -D_HAS_AUTO_PTR_ETC=0 -fpermissive  # [osx]
+    - CMAKE_CXX_FLAGS=-O2 -DNDEBUG  -fpermissive  # [osx]
     - CMAKE_CXX_FLAGS=/O2 /DNDEBUG /MD /Zc:twoPhase- /DBOOST_PYTHON_STATIC_LIB /DBOOST_NUMPY_STATIC_LIB  # [win and py<=38]
     - CMAKE_CXX_FLAGS=/O2 /DNDEBUG /MD /Zc:twoPhase- /DBOOST_PYTHON_STATIC_LIB /DBOOST_NUMPY_STATIC_LIB /DHAVE_SNPRINTF  # [win and py>=39]
     - SQS_CMAKE_VERBOSE_MAKEFILE=ON  # [win]
@@ -35,7 +35,7 @@ requirements:
     - python
     - boost
     - boost-cpp
-    - libcxx <16      # [osx]
+    - libcxx <16     # [osx]
     - llvm-openmp    # [osx]
     - libgomp        # [linux]
     - {{ compiler('cxx') }}
