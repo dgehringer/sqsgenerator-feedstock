@@ -12,7 +12,7 @@ source:
     - pycompat.patch
 
 build:
-  number: 0
+  number: 1
   entry_points:
     - sqsgen = sqsgenerator.cli:cli
   script_env:
@@ -35,8 +35,8 @@ requirements:
     - ninja          # [win]
     - numpy
     - python
-    - boost
-    - boost-cpp
+    - libboost-python-devel
+    - libboost-devel
     - libcxx <16     # [osx]
     - llvm-openmp    # [osx]
     - libgomp        # [linux]
@@ -48,8 +48,8 @@ requirements:
     - ninja  # [win]
     - numpy
     - python
-    - boost
-    - boost-cpp
+    - libboost-python-devel
+    - libboost-devel
     - llvm-openmp  # [osx]
     - libgomp      # [linux]
     - libcxx <16  # [osx]
@@ -65,8 +65,6 @@ requirements:
     - llvm-openmp  # [osx]
     - libgomp      # [linux]
     - {{ pin_compatible('numpy') }}
-    - {{ pin_compatible('boost') }}
-    - {{ pin_compatible('boost-cpp') }}
     - {{ pin_compatible('libcxx', min_pin='x.x', max_pin='x.x') }}  # [osx]
 
 test:
