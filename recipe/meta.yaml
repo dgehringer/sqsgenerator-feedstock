@@ -18,8 +18,8 @@ build:
   script_env:
     - CMAKE_CXX_FLAGS=-O2 -DNDEBUG  # [not win]
     - CMAKE_CXX_FLAGS=-O2 -DNDEBUG  -fpermissive  # [osx]
-    - CMAKE_CXX_FLAGS=/O2 /DNDEBUG /MD /Zc:twoPhase- /DBOOST_PYTHON_STATIC_LIB /DBOOST_NUMPY_STATIC_LIB  # [win and py<=38]
-    - CMAKE_CXX_FLAGS=/O2 /DNDEBUG /MD /Zc:twoPhase- /DBOOST_PYTHON_STATIC_LIB /DBOOST_NUMPY_STATIC_LIB /DHAVE_SNPRINTF  # [win and py>=39]
+    - CMAKE_CXX_FLAGS=/O2 /DNDEBUG /MD /Zc:twoPhase-  # [win and py<=38]
+    - CMAKE_CXX_FLAGS=/O2 /DNDEBUG /MD /Zc:twoPhase- /DHAVE_SNPRINTF  # [win and py>=39]
     - SQS_CMAKE_VERBOSE_MAKEFILE=ON  # [win]
     - SQS_FORWARD_WHITELIST=CMAKE_PREFIX_PATH  # [win]
     - SQS_CMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL  # [win]
@@ -35,8 +35,8 @@ requirements:
     - ninja          # [win]
     - numpy
     - python
-    - boost
-    - boost-cpp
+    - libboost-python-devel
+    - libboost-devel
     - libcxx <16     # [osx]
     - llvm-openmp    # [osx]
     - libgomp        # [linux]
@@ -48,8 +48,8 @@ requirements:
     - ninja  # [win]
     - numpy
     - python
-    - boost
-    - boost-cpp
+    - libboost-python-devel
+    - libboost-devel
     - llvm-openmp  # [osx]
     - libgomp      # [linux]
     - libcxx <16  # [osx]
@@ -65,8 +65,6 @@ requirements:
     - llvm-openmp  # [osx]
     - libgomp      # [linux]
     - {{ pin_compatible('numpy') }}
-    - {{ pin_compatible('boost') }}
-    - {{ pin_compatible('boost-cpp') }}
     - {{ pin_compatible('libcxx', min_pin='x.x', max_pin='x.x') }}  # [osx]
 
 test:
