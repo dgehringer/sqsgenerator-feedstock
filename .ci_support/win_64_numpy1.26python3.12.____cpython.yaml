@@ -1,20 +1,16 @@
-boost:
-- 1.78.0
-boost_cpp:
-- 1.78.0
 channel_sources:
-- conda-forge/label/python_rc,conda-forge
+- conda-forge
 channel_targets:
 - conda-forge main
 cxx_compiler:
 - vs2019
+libboost_devel:
+- '1.82'
+libboost_python_devel:
+- '1.82'
 numpy:
 - '1.26'
 pin_run_as_build:
-  boost:
-    max_pin: x.x.x
-  boost-cpp:
-    max_pin: x.x.x
   python:
     min_pin: x.x
     max_pin: x.x
@@ -25,4 +21,3 @@ target_platform:
 zip_keys:
 - - python
   - numpy
-  - channel_sources

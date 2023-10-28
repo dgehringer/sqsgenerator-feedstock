@@ -12,7 +12,7 @@ source:
     - pycompat.patch
 
 build:
-  number: 1
+  number: 2
   entry_points:
     - sqsgen = sqsgenerator.cli:cli
   script_env:
@@ -37,7 +37,6 @@ requirements:
     - python
     - libboost-python-devel
     - libboost-devel
-    - libcxx <16     # [osx]
     - llvm-openmp    # [osx]
     - libgomp        # [linux]
     - {{ compiler('cxx') }}
@@ -52,7 +51,6 @@ requirements:
     - libboost-devel
     - llvm-openmp  # [osx]
     - libgomp      # [linux]
-    - libcxx <16  # [osx]
   run:
     - pip
     - six

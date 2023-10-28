@@ -13,7 +13,7 @@ libboost_devel:
 libboost_python_devel:
 - '1.82'
 llvm_openmp:
-- '15'
+- '16'
 macos_machine:
 - x86_64-apple-darwin13.4.0
 numpy:
@@ -29,4 +29,3 @@ target_platform:
 zip_keys:
 - - python
   - numpy
-  - channel_sources
