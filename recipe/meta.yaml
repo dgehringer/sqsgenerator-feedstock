@@ -12,7 +12,7 @@ source:
     - pycompat.patch
 
 build:
-  number: 3
+  number: 4
   entry_points:
     - sqsgen = sqsgenerator.cli:cli
   script_env:
@@ -40,6 +40,7 @@ requirements:
     - llvm-openmp    # [osx]
     - libgomp        # [linux]
     - {{ compiler('cxx') }}
+    - {{ stdlib("c") }}
     - cross-python_{{ target_platform }}     # [build_platform != target_platform]
   host:
     - pip
