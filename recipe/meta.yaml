@@ -12,7 +12,7 @@ source:
     - pycompat.patch
 
 build:
-  number: 5
+  number: 6
   entry_points:
     - sqsgen = sqsgenerator.cli:cli
   script_env:
@@ -63,7 +63,6 @@ requirements:
     - frozendict
     - llvm-openmp  # [osx]
     - libgomp      # [linux]
-    - {{ pin_compatible('numpy') }}
     - {{ pin_compatible('libcxx', min_pin='x.x', max_pin='x.x') }}  # [osx]
 
 test:
