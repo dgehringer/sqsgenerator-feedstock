@@ -48,6 +48,7 @@ requirements:
     - ninja  # [win]
     - numpy
     - python
+    - setuptools
     - libboost-python-devel
     - libboost-devel
     - llvm-openmp  # [osx]
