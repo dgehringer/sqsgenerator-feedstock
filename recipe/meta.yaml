@@ -1,83 +1,64 @@
 {% set name = "sqsgenerator" %}
-{% set version = "0.3" %}
+{% set version = "0.4.9" %}
 
 package:
   name: {{ name|lower }}
   version: {{ version }}
 
 source:
-  url: https://github.com/dgehringer/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: 6bd8299e50860d47cdec99809e006b5caa5c4c9774fe189b85374ebd2bbf88ba
-  patches:
-    - fixes.patch
+  git_url: https://github.com/dgehringer/sqsgenerator.git
+  git_rev: v{{ version }}-rc.1
+
 
 build:
-  number: 10
+  number: 0
   entry_points:
     - sqsgen = sqsgenerator.cli:cli
-  script_env:
-    - CMAKE_CXX_FLAGS=-O2 -DNDEBUG  # [not win]
-    - CMAKE_CXX_FLAGS=-O2 -DNDEBUG  -fpermissive  # [osx]
-    - CMAKE_CXX_FLAGS=/O2 /DNDEBUG /MD /Zc:twoPhase-  # [win and py<=38]
-    - CMAKE_CXX_FLAGS=/O2 /DNDEBUG /MD /Zc:twoPhase- /DHAVE_SNPRINTF  # [win and py>=39]
-    - SQS_CMAKE_VERBOSE_MAKEFILE=ON  # [win]
-    - SQS_FORWARD_WHITELIST=CMAKE_PREFIX_PATH  # [win]
-    - SQS_CMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL  # [win]
-  script: {{ PYTHON }} -m pip install . -vv
-  skip: true  # [py<35]
+  script: |
+    git submodule update --init
+    {{ PYTHON }} -m pip install ./python -vv
+  skip: true  # [py<39]
 
 requirements:
   build:
-    - pip
-    - six
-    - make           # [unix]
-    - cmake >=3.12.0
-    - ninja          # [win]
-    - numpy
     - python
-    - libboost-python-devel
-    - libboost-devel
-    - llvm-openmp    # [osx]
-    - libgomp        # [linux]
     - {{ compiler('cxx') }}
-    - {{ stdlib("c") }}
-    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - numpy
+    - pybind11>=2.10.0
+    - scikit-build-core
   host:
     - pip
-    - six
-    - ninja  # [win]
-    - numpy
+    - git
     - python
-    - setuptools
-    - libboost-python-devel
-    - libboost-devel
-    - llvm-openmp  # [osx]
-    - libgomp      # [linux]
+    - pybind11>=2.10.0
+    - numpy>=1.26.0
+    - mypy
   run:
-    - pip
-    - six
-    - rich
-    - numpy
-    - click
     - python
-    - pyyaml
-    - frozendict
-    - llvm-openmp  # [osx]
-    - libgomp      # [linux]
-    - {{ pin_compatible('libcxx', min_pin='x.x', max_pin='x.x') }}  # [osx]
+    - click
+    - numpy>=1.26.0
 
 test:
   imports:
     - sqsgenerator
+  source_files:
+    - tests
+  requires:
+    - pytest
+    - ase
+    - pymatgen
   commands:
     - pip check
+    - pytest
+    - pytest ./python/tests --import-mode=importlib
+
 
 about:
   home: https://github.com/dgehringer/sqsgenerator
   license: MIT
   license_family: MIT
   license_file: LICENSE
-  summary: A command line tool written in Python/C++ to analyse short-range order or generate SQS structures
+  summary: A command line tool written in Python/C++ to generate SQS structures
 
   description: |
     This package is a Special Quasirandom Structure generator written 
