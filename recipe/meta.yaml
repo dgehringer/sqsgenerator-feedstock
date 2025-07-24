@@ -28,15 +28,11 @@ requirements:
     - numpy
     - pybind11
     - scikit-build-core
-  host:
-    - pip
-    - git
-    - python
-    - pybind11
-    - numpy
     - mypy
-    - scikit-build-core
     - cmake
+  host:
+    - python
+
   run:
     - python
     - click
