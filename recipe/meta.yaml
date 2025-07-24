@@ -26,19 +26,20 @@ requirements:
     - {{ compiler("cxx") }}
     - {{ stdlib("c") }}
     - numpy
-    - pybind11 >=2.10.0
+    - pybind11
     - scikit-build-core
   host:
     - pip
     - git
     - python
-    - pybind11 >=2.10.0
-    - numpy >=1.26.0
+    - pybind11
+    - numpy
     - mypy
+    - scikit-build-core
   run:
     - python
     - click
-    - numpy >=1.26.0
+    - numpy
 
 test:
   imports:
