@@ -19,7 +19,7 @@ build:
     - git clone https://github.com/microsoft/vcpkg.git
     - cd vcpkg && ./bootstrap-vcpkg.sh  # [unix]
     - cd vcpkg && bootstrap-vcpkg.bat   # [win]
-    - {{ PYTHON }} -m pip install ./python -vv
+    - pip install ./python -vv
   script_env:
     - CMAKE_GENERATOR=Ninja  # [unix]
   skip: true  # [py<39]
@@ -37,6 +37,10 @@ requirements:
     - cmake
     - ninja
     - make
+    - tar  # [linux]
+    - unzip  # [linux]
+    - curl  # [linux]
+    - zip  # [linux]
     - cross-python_{{ target_platform }}  # [build_platform != target_platform]
   host:
     - pip
