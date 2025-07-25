@@ -23,8 +23,8 @@ build:
   script_env:
     - CMAKE_GENERATOR=Ninja  # [unix]
     - VCPKG_DISABLE_METRICS=1
-    - CMAKE_CXX_COMPILER={{ CXX_FOR_BUILD }}  # [unix]
-    - CMAKE_C_COMPILER={{ C_FOR_BUILD }}  # [unix]
+    - CMAKE_CXX_COMPILER={{ CXX }}  # [unix]
+    - CMAKE_C_COMPILER={{ CC }}  # [unix]
   skip: true  # [py<39]
 
 requirements:
