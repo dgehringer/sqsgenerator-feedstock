@@ -15,16 +15,16 @@ build:
   entry_points:
     - sqsgen = sqsgenerator.cli:cli
   script:
+    - export CMAKE_GENERATOR=Ninja  # [unix]
+    - export CMAKE_CXX_COMPILER=$CXX  # [unix]
+    - export CMAKE_C_COMPILER=$CC  # [unix]
     - rm -rf vcpkg
     - git clone https://github.com/microsoft/vcpkg.git
     - cd vcpkg && ./bootstrap-vcpkg.sh && cd ..  # [unix]
     - cd vcpkg && bootstrap-vcpkg.bat && cd ..  # [win]
     - cd python && {{ PYTHON }} -m pip install . -vv
   script_env:
-    - CMAKE_GENERATOR=Ninja  # [unix]
     - VCPKG_DISABLE_METRICS=1
-    - CMAKE_CXX_COMPILER={{ CXX }}  # [unix]
-    - CMAKE_C_COMPILER={{ CC }}  # [unix]
   skip: true  # [py<39]
 
 requirements:
