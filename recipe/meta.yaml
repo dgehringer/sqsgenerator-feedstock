@@ -17,11 +17,12 @@ build:
   script:
     - rm -rf vcpkg
     - git clone https://github.com/microsoft/vcpkg.git
-    - cd vcpkg && ./bootstrap-vcpkg.sh  # [unix]
-    - cd vcpkg && bootstrap-vcpkg.bat   # [win]
+    - cd vcpkg && ./bootstrap-vcpkg.sh && cd ..  # [unix]
+    - cd vcpkg && bootstrap-vcpkg.bat && cd ..  # [win]
     - cd python && pip install . -vv
   script_env:
     - CMAKE_GENERATOR=Ninja  # [unix]
+    - VCPKG_DISABLE_METRICS=1
   skip: true  # [py<39]
 
 requirements:
