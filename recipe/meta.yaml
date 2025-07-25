@@ -30,7 +30,6 @@ build:
 requirements:
   build:
     - pip
-    - python
     - {{ compiler("cxx") }}
     - {{ stdlib("c") }}
     - numpy
@@ -44,7 +43,7 @@ requirements:
     - unzip  # [linux]
     - curl  # [linux]
     - zip  # [linux]
-    - pkg-config  # [linux]
+    - pkg-config  # [linux, osx]
     - cross-python_{{ target_platform }}  # [build_platform != target_platform]
   host:
     - pip
