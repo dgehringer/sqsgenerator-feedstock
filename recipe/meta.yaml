@@ -6,7 +6,7 @@ package:
   version: {{ version }}
 
 source:
-  url: https://github.com/dgehringer/sqsgenerator/archive/refs/tags/v{{ version }}-rc.1.tar.gz
+  url: https://github.com/dgehringer/sqsgenerator/archive/v{{ version }}-rc.1.tar.gz
   sha256: c22b6de9c0eb76917abb3f641516339f62369e1676f0e6f9b79dc32b757546d9
 
 
