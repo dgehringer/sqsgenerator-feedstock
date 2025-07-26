@@ -35,7 +35,6 @@ requirements:
     - cmake >=3.27.0
     - ninja  # [win]
     - numpy
-    - python
     - tar  # [linux]
     - unzip  # [linux]
     - curl  # [linux]
