@@ -17,9 +17,10 @@ build:
   script:
     - git clone https://github.com/microsoft/vcpkg.git
     - vcpkg/bootstrap-vcpkg.sh  # [unix]
-    - export CMAKE_ARGS="$CMAKE_ARGS -DVCPKG_TARGET_TRIPLET=arm64-linux"  # [aarch64]
-    - export CMAKE_ARGS="$CMAKE_ARGS -DVCPKG_TARGET_TRIPLET=arm64-osx"  # [osx-arm64]
-    - export CMAKE_ARGS="$CMAKE_ARGS -DVCPKG_TARGET_TRIPLET=ppc64le-linux"  # [ppc64le]
+    - export VCPKG_TARGET_TRIPLET=arm64-linux"  # [aarch64]
+    - export VCPKG_TARGET_TRIPLET=arm64-osx"  # [osx-arm64]
+    - export VCPKG_TARGET_TRIPLET=ppc64le-linux"  # [ppc64le]
+    - export CMAKE_ARGS="$CMAKE_ARGS -DVCPKG_TARGET_TRIPLET=$VCPKG_TARGET_TRIPLET"  # [aarch64 or osx-arm64 or ppc64le]
     - vcpkg\bootstrap-vcpkg.bat  # [win]
     - {{ PYTHON }} scripts/patch-pyproject.py $SRC_DIR/python/pyproject.toml  # [unix]
     - {{ PYTHON }} -m pip install python/ -v --no-deps --no-build-isolation  # [unix]
