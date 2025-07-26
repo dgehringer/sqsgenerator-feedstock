@@ -12,65 +12,58 @@ source:
     - fixes.patch
 
 build:
-  number: 10
+  number: 0
   entry_points:
     - sqsgen = sqsgenerator.cli:cli
-  script_env:
-    - CMAKE_CXX_FLAGS=-O2 -DNDEBUG  # [not win]
-    - CMAKE_CXX_FLAGS=-O2 -DNDEBUG  -fpermissive  # [osx]
-    - CMAKE_CXX_FLAGS=/O2 /DNDEBUG /MD /Zc:twoPhase-  # [win and py<=38]
-    - CMAKE_CXX_FLAGS=/O2 /DNDEBUG /MD /Zc:twoPhase- /DHAVE_SNPRINTF  # [win and py>=39]
-    - SQS_CMAKE_VERBOSE_MAKEFILE=ON  # [win]
-    - SQS_FORWARD_WHITELIST=CMAKE_PREFIX_PATH  # [win]
-    - SQS_CMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL  # [win]
-  script: {{ PYTHON }} -m pip install . -vv
+  script:
+    - CXXFLAGS="${CXXFLAGS} -D_LIBCPP_DISABLE_AVAILABILITY"  # [unix]
+    - export VCPKG_DISABLE_METRICS=1  # [unix]
+    - set VCPKG_DISABLE_METRICS=1  # [win]
+    - export CMAKE_GENERATOR=Ninja  # [unix]
+    - export CMAKE_CXX_COMPILER=$CXX  # [unix]
+    - export CMAKE_C_COMPILER=$CC  # [unix]
+    - rm -rf vcpkg
+    - git clone https://github.com/microsoft/vcpkg.git
+    - cd vcpkg && ./bootstrap-vcpkg.sh && cd ..  # [unix]
+    - cd vcpkg && bootstrap-vcpkg.bat && cd ..  # [win]
+    - cd python
+    - {{ PYTHON }} -m pip install . -vv
   skip: true  # [py<35]
 
 requirements:
   build:
     - pip
-    - six
-    - make           # [unix]
-    - cmake >=3.12.0
-    - ninja          # [win]
+    - make  # [unix]
+    - cmake >=3.27.0
+    - ninja  # [win]
     - numpy
     - python
-    - libboost-python-devel
-    - libboost-devel
-    - llvm-openmp    # [osx]
-    - libgomp        # [linux]
+    - tar  # [linux]
+    - unzip  # [linux]
+    - curl  # [linux]
+    - zip  # [linux]
+    - pkg-config  # [linux, osx]
+    - scikit-build-core
     - {{ compiler('cxx') }}
     - {{ stdlib("c") }}
     - cross-python_{{ target_platform }}     # [build_platform != target_platform]
   host:
     - pip
-    - six
     - ninja  # [win]
     - numpy
     - python
     - setuptools
-    - libboost-python-devel
-    - libboost-devel
-    - llvm-openmp  # [osx]
-    - libgomp      # [linux]
+    - scikit-build-core
+
   run:
-    - pip
-    - six
-    - rich
     - numpy
     - click
     - python
-    - pyyaml
-    - frozendict
-    - llvm-openmp  # [osx]
-    - libgomp      # [linux]
     - {{ pin_compatible('libcxx', min_pin='x.x', max_pin='x.x') }}  # [osx]
 
 test:
   imports:
     - sqsgenerator
-  commands:
-    - pip check
 
 about:
   home: https://github.com/dgehringer/sqsgenerator
