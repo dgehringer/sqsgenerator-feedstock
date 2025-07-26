@@ -4,10 +4,6 @@ set -ex
 export VCPKG_DISABLE_METRICS=""
 CXXFLAGS="${CXXFLAGS} -D_LIBCPP_DISABLE_AVAILABILITY"
 
-rm -rf vcpkg
-git clone https://github.com/microsoft/vcpkg.git
-vcpkg/bootstrap-vcpkg.sh
-
 SKBUILD_CMAKE_ARGS="\
 -DCMAKE_CXX_COMPILER=$CXX \
 -DCMAKE_C_COMPILER=$CC \
@@ -17,4 +13,4 @@ SKBUILD_CMAKE_ARGS="\
 
 export SKBUILD_CMAKE_ARGS
 
-$PYTHON -m build --wheel python/ -vv
+$PYTHON -m pip install python/ -vv

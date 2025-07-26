@@ -16,7 +16,10 @@ build:
   entry_points:
     - sqsgen = sqsgenerator.cli:cli
   script:
-    - {{ RECIPE_DIR }}/build_wheel.sh  # [unix]
+    - git clone https://github.com/microsoft/vcpkg.git
+    - vcpkg/bootstrap-vcpkg.sh  # [unix]
+    - vcpkg\bootstrap-vcpkg.bat. # [win]
+    - chmod +x ${RECIPE_DIR}/build_wheel.sh  && {{ RECIPE_DIR }}/build_wheel.sh  # [unix]
 
   skip: true  # [py<35 or win]
 
