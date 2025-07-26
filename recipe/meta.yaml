@@ -47,6 +47,7 @@ requirements:
     - zip  # [linux]
     - pkg-config  # [linux, osx]
     - cross-python_{{ target_platform }}  # [build_platform != target_platform]
+    - {{ pin_compatible('libcxx', min_pin='x.x', max_pin='x.x') }}  # [osx]
   host:
     - pip
     - python
