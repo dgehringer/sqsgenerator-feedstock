@@ -17,11 +17,11 @@ build:
   script: |
     export CXXFLAGS="${CXXFLAGS} -D_LIBCPP_DISABLE_AVAILABILITY"  # [unix]
     git clone https://github.com/microsoft/vcpkg.git
-    ./vcpkg/bootstrap-vcpkg.sh  # [unix]
+    vcpkg/bootstrap-vcpkg.sh  # [unix]
+    vcpkg\bootstrap-vcpkg.bat  # [win]
     ${PYTHON} scripts/patch-pyproject.py ${SRC_DIR}/python/pyproject.toml  # [unix]
-    python -m pip install python/ -v --no-deps --no-build-isolation
+    {{ PYTHON }} -m pip install python/ -v --no-deps --no-build-isolation
 
-  skip: true  # [py<35 or ppc64le]
 
 requirements:
   build:
