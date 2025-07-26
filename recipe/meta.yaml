@@ -24,7 +24,10 @@ build:
     - git clone https://github.com/microsoft/vcpkg.git
     - cd vcpkg/ && ./bootstrap-vcpkg.sh && cd ..  # [unix]
     - cd vcpkg/ && bootstrap-vcpkg.bat && cd ..  # [win]
-    - {{ PYTHON }} -m pip install python/ -vv
+    - call "%LIBRARY_PREFIX%\etc\conda\activate.bat"  # [win]
+    - pip install "%SRC_DIR%\python" --no-deps --prefix="%PREFIX%" -vv  # [win]
+    - {{ PYTHON }} -m pip install --no-deps python/ -vv  # [unix]
+
   skip: true  # [py<35]
   script_env:
     - PYTHON
