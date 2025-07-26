@@ -21,15 +21,14 @@ build:
     - export CMAKE_GENERATOR=Ninja  # [unix]
     - export CMAKE_CXX_COMPILER=$CXX  # [unix]
     - export CMAKE_C_COMPILER=$CC  # [unix]
+    - export VCPKG_TARGET_TRIPLET=ppc64le-linux  # [ppc64le]
+    - export VCPKG_TARGET_TRIPLET=arm64-linux  # [aarch64]
     - rm -rf vcpkg/
     - git clone https://github.com/microsoft/vcpkg.git
     - vcpkg/bootstrap-vcpkg.sh  # [unix]
     - call %SRC_DIR%\vcpkg\bootstrap-vcpkg.bat  # [win]
     - {{ PYTHON }} -m pip install --no-deps python/ -vv
-
   skip: true  # [py<35]
-  script_env:
-    - PYTHON
 
 requirements:
   build:
