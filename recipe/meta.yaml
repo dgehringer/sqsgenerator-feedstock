@@ -24,7 +24,7 @@ build:
     - export VCPKG_DEFAULT_TRIPLET=arm64-linux  # [aarch64]
     - export VCPKG_DEFAULT_TRIPLET=ppc64le-linux  # [ppc64le]
     - export VCPKG_DEFAULT_TRIPLET=arm64-osx  # [osx-arm64]
-    - export CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_CXX_COMPILER=$CXX -DCMAKE_C_COMPILER=$CC -DCMAKE_TOOLCHAIN_FILE=$SRC_DIR/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_MANIFEST_DIR=$SRC_DIR -DVCPKG_MANIFEST_FEATURES=python"  # [unix]
+    - export CMAKE_ARGS="-DCMAKE_CXX_COMPILER=$CXX -DCMAKE_C_COMPILER=$CC -DCMAKE_TOOLCHAIN_FILE=$SRC_DIR/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_MANIFEST_DIR=$SRC_DIR -DVCPKG_MANIFEST_FEATURES=python $CMAKE_ARGS "  # [unix]
     - rm -rf vcpkg/
     - git clone https://github.com/microsoft/vcpkg.git
     - vcpkg/bootstrap-vcpkg.sh  # [unix]
