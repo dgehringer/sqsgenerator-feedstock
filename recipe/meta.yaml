@@ -8,6 +8,8 @@ package:
 source:
   url: https://github.com/dgehringer/sqsgenerator/archive/v{{ version }}-rc.1.tar.gz
   sha256: c22b6de9c0eb76917abb3f641516339f62369e1676f0e6f9b79dc32b757546d9
+  patches:
+    - cmake_args.patch  # [unix]
 
 build:
   number: 0
@@ -23,6 +25,7 @@ build:
     - export CMAKE_C_COMPILER=$CC  # [unix]
     - export VCPKG_TARGET_TRIPLET=ppc64le-linux  # [ppc64le]
     - export VCPKG_TARGET_TRIPLET=arm64-linux  # [aarch64]
+    - export CMAKE_ARGS="$CMAKE_ARGS -DVCPKG_TARGET_TRIPLET=$VCPKG_TARGET_TRIPLET -DCMAKE_TOOLCHAIN_FILE=$SRC_DIR/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_MANIFEST_DIR=$SRC_DIR -DVCPKG_MANIFEST_FEATURES=python"  # [unix]
     - rm -rf vcpkg/
     - git clone https://github.com/microsoft/vcpkg.git
     - vcpkg/bootstrap-vcpkg.sh  # [unix]

@@ -1,0 +1,31 @@
+Subject: [PATCH] 💚 simplify & accelerate wheels
+---
+Index: python/pyproject.toml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/python/pyproject.toml b/python/pyproject.toml
+--- a/python/pyproject.toml	(revision cd2926f331e23158a3b9a52cb22b90a832c10ec8)
++++ b/python/pyproject.toml	(date 1753530774291)
+@@ -12,6 +12,7 @@
+ dynamic = ["version"]
+ readme = "README.md"
+ requires-python = ">=3.9"
++license = "MIT"
+ 
+ [project.urls]
+ Homepage = "https://github.com/dgehringer/sqsgenerator"
+@@ -36,12 +37,6 @@
+ [tool.scikit-build]
+ build.verbose = true
+ logging.level = "DEBUG"
+-cmake.args = [
+-    "-DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake",
+-    "-DVCPKG_MANIFEST_DIR=..",
+-    "-DVCPKG_INSTALLED_DIR=../vcpkg_installed",
+-    "-DVCPKG_MANIFEST_FEATURES=python"
+-]
+ wheel.packages = ["sqsgenerator"]
+ 
+ 
