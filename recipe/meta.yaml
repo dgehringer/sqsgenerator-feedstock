@@ -16,7 +16,8 @@ build:
   entry_points:
     - sqsgen = sqsgenerator.cli:cli
   script:
-    - script: {{ RECIPE_DIR }}/build_wheel.sh  # [unix]
+    - {{ RECIPE_DIR }}/build_wheel.sh  # [unix]
+
   skip: true  # [py<35 or win]
 
 requirements:
