@@ -20,8 +20,9 @@ build:
     vcpkg/bootstrap-vcpkg.sh  # [unix]
     vcpkg\bootstrap-vcpkg.bat  # [win]
     ${PYTHON} scripts/patch-pyproject.py ${SRC_DIR}/python/pyproject.toml  # [unix]
-    {{ PYTHON }} -m pip install python/ -v --no-deps --no-build-isolation
-
+    ${PYTHON} -m pip install python/ -v --no-deps --no-build-isolation  # [unix]
+    %PYTHON% scripts/patch-pyproject.py %SRC_DIR%/python/pyproject.toml  # [win]
+    %PYTHON% -m pip install python/ -v --no-deps --no-build-isolation  # [win]
 
 requirements:
   build:
