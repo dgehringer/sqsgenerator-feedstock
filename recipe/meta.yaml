@@ -15,6 +15,9 @@ build:
   entry_points:
     - sqsgen = sqsgenerator.cli:cli
   script:
+    - CXXFLAGS="${CXXFLAGS} -D_LIBCPP_DISABLE_AVAILABILITY"  # [unix]
+    - export VCPKG_DISABLE_METRICS=1  # [unix]
+    - set VCPKG_DISABLE_METRICS=1  # [win]
     - export CMAKE_GENERATOR=Ninja  # [unix]
     - export CMAKE_CXX_COMPILER=$CXX  # [unix]
     - export CMAKE_C_COMPILER=$CC  # [unix]
@@ -23,8 +26,7 @@ build:
     - cd vcpkg && ./bootstrap-vcpkg.sh && cd ..  # [unix]
     - cd vcpkg && bootstrap-vcpkg.bat && cd ..  # [win]
     - cd python && {{ PYTHON }} -m pip install . -vv
-  script_env:
-    - VCPKG_DISABLE_METRICS=1
+
   skip: true  # [py<39]
 
 requirements:
@@ -62,12 +64,11 @@ test:
   source_files:
     - tests
   requires:
-    - pytest
-    - ase
-    - pymatgen
+    - pytest  # [not powerpc64le]
+    - ase  # [not powerpc64le]
+    - pymatgen  # [not powerpc64le]
   commands:
-    - pip check
-    - cd python/tests && pytest --import-mode=importlib
+    - cd python/tests && pytest --import-mode=importlib  # [not powerpc64le]
 
 
 about:
