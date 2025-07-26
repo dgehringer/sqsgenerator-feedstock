@@ -16,7 +16,7 @@ build:
   entry_points:
     - sqsgen = sqsgenerator.cli:cli
   script:
-    - build.sh  # [unix]
+    - build_wheel.sh  # [unix]
   skip: true  # [py<35 or win]
 
 requirements:
@@ -43,6 +43,7 @@ requirements:
     - numpy
     - python
     - setuptools
+    - python-build
     - pybind11 >=2.10.0
     - scikit-build-core
 

@@ -16,4 +16,4 @@ SKBUILD_CMAKE_ARGS="\
 
 export SKBUILD_CMAKE_ARGS
 
-$PYTHON -m pip install python/ -vv
+$PYTHON -m build --wheel python/ -vv
