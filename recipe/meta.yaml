@@ -19,19 +19,14 @@ build:
     git clone https://github.com/microsoft/vcpkg.git
     vcpkg/bootstrap-vcpkg.sh  # [unix]
     vcpkg\bootstrap-vcpkg.bat  # [win]
-    ${PYTHON} scripts/patch-pyproject.py ${SRC_DIR}/python/pyproject.toml  # [unix]
     ${PYTHON} -m pip install python/ -v --no-deps --no-build-isolation  # [unix]
-    %PYTHON% scripts/patch-pyproject.py %SRC_DIR%/python/pyproject.toml  # [win]
     %PYTHON% -m pip install python/ -v --no-deps --no-build-isolation  # [win]
 
 requirements:
   build:
-    - pip
-    - setuptools
-    - make           # [unix]
+    - make  # [unix]
     - cmake >=3.27.0
     - ninja
-    - toml
     - tar  # [linux]
     - unzip  # [linux]
     - curl  # [linux]
@@ -39,18 +34,11 @@ requirements:
     - pkg-config  # [linux, osx]
     - {{ compiler('cxx') }}
     - {{ stdlib("c") }}
-    - cross-python_{{ target_platform }}  # [build_platform != target_platform]
-    - python  # [build_platform != target_platform]
-    - scikit-build-core  # [build_platform != target_platform]
-    - numpy  # [build_platform != target_platform]
   host:
     - pip
     - ninja  # [win]
     - numpy
     - python
-    - toml
-    - setuptools
-    - python-build
     - pybind11 >=2.10.0
     - scikit-build-core
 
