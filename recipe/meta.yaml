@@ -16,11 +16,8 @@ build:
     - sqsgen = sqsgenerator.cli:cli
   script:
     - git clone https://github.com/microsoft/vcpkg.git
-    - vcpkg/bootstrap-vcpkg.sh  # [unix]
-    - export VCPKG_TARGET_TRIPLET=arm64-osx  # [osx-arm64]
-    - export VCPKG_TARGET_TRIPLET=x64-osx  # [osx64]
-    - export CMAKE_ARGS="$CMAKE_ARGS -DVCPKG_TARGET_TRIPLET=${VCPKG_TARGET_TRIPLET}"  # [osx64]
-    - vcpkg\bootstrap-vcpkg.bat  # [win]
+    - vcpkg/bootstrap-vcpkg.sh  # [not win]
+    - vcpkg\bootstrap-vcpkg.bat # [win]
     - {{ PYTHON }} scripts/patch-pyproject.py $SRC_DIR/python/pyproject.toml  # [unix]
     - {{ PYTHON }} -m pip install python/ -v --no-deps --no-build-isolation  # [unix]
 
