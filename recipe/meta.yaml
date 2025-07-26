@@ -1,76 +1,67 @@
 {% set name = "sqsgenerator" %}
-{% set version = "0.3" %}
+{% set version = "0.4.9" %}
 
 package:
   name: {{ name|lower }}
   version: {{ version }}
 
 source:
-  url: https://github.com/dgehringer/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: 6bd8299e50860d47cdec99809e006b5caa5c4c9774fe189b85374ebd2bbf88ba
-  patches:
-    - fixes.patch
+  url: https://github.com/dgehringer/sqsgenerator/archive/v{{ version }}-rc.1.tar.gz
+  sha256: c22b6de9c0eb76917abb3f641516339f62369e1676f0e6f9b79dc32b757546d9
 
 build:
-  number: 10
+  number: 0
   entry_points:
     - sqsgen = sqsgenerator.cli:cli
-  script_env:
-    - CMAKE_CXX_FLAGS=-O2 -DNDEBUG  # [not win]
-    - CMAKE_CXX_FLAGS=-O2 -DNDEBUG  -fpermissive  # [osx]
-    - CMAKE_CXX_FLAGS=/O2 /DNDEBUG /MD /Zc:twoPhase-  # [win and py<=38]
-    - CMAKE_CXX_FLAGS=/O2 /DNDEBUG /MD /Zc:twoPhase- /DHAVE_SNPRINTF  # [win and py>=39]
-    - SQS_CMAKE_VERBOSE_MAKEFILE=ON  # [win]
-    - SQS_FORWARD_WHITELIST=CMAKE_PREFIX_PATH  # [win]
-    - SQS_CMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL  # [win]
-  script: {{ PYTHON }} -m pip install . -vv
+  script:
+    - CXXFLAGS="${CXXFLAGS} -D_LIBCPP_DISABLE_AVAILABILITY"  # [unix]
+    - export VCPKG_DISABLE_METRICS=1  # [unix]
+    - set VCPKG_DISABLE_METRICS=1  # [win]
+    - set CMAKE_GENERATOR=Ninja  # [win]
+    - export CMAKE_CXX_COMPILER=$CXX  # [unix]
+    - export CMAKE_C_COMPILER=$CC  # [unix]
+    - rm -rf vcpkg/
+    - git clone https://github.com/microsoft/vcpkg.git
+    - vcpkg/bootstrap-vcpkg.sh  # [unix]
+    - call %SRC_DIR%\vcpkg\bootstrap-vcpkg.bat # [win]
+    - {{ PYTHON }} -m pip install --no-deps python/ -vv
+
   skip: true  # [py<35]
+  script_env:
+    - PYTHON
 
 requirements:
   build:
     - pip
-    - six
+    - setuptools
     - make           # [unix]
     - cmake >=3.12.0
     - ninja          # [win]
     - numpy
-    - python
-    - libboost-python-devel
-    - libboost-devel
-    - llvm-openmp    # [osx]
-    - libgomp        # [linux]
+    - tar  # [linux]
+    - unzip  # [linux]
+    - curl  # [linux]
+    - zip  # [linux]
+    - pkg-config  # [linux, osx]
     - {{ compiler('cxx') }}
     - {{ stdlib("c") }}
     - cross-python_{{ target_platform }}     # [build_platform != target_platform]
   host:
     - pip
-    - six
     - ninja  # [win]
     - numpy
     - python
     - setuptools
-    - libboost-python-devel
-    - libboost-devel
-    - llvm-openmp  # [osx]
-    - libgomp      # [linux]
+
   run:
-    - pip
-    - six
-    - rich
     - numpy
     - click
     - python
-    - pyyaml
-    - frozendict
-    - llvm-openmp  # [osx]
-    - libgomp      # [linux]
     - {{ pin_compatible('libcxx', min_pin='x.x', max_pin='x.x') }}  # [osx]
 
 test:
   imports:
     - sqsgenerator
-  commands:
-    - pip check
 
 about:
   home: https://github.com/dgehringer/sqsgenerator
