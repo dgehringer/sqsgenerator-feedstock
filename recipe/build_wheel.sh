@@ -1,4 +1,5 @@
-#/bin/bash
+#!/bin/bash
+set -ex
 
 export VCPKG_DISABLE_METRICS=""
 CXXFLAGS="${CXXFLAGS} -D_LIBCPP_DISABLE_AVAILABILITY"
