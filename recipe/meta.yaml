@@ -20,13 +20,14 @@ build:
     - set CMAKE_GENERATOR=Ninja  # [win]
     - export CMAKE_CXX_COMPILER=$CXX  # [unix]
     - export CMAKE_C_COMPILER=$CC  # [unix]
-    - rm -rf vcpkg
+    - rm -rf vcpkg/
     - git clone https://github.com/microsoft/vcpkg.git
-    - cd vcpkg && ./bootstrap-vcpkg.sh && cd ..  # [unix]
-    - cd vcpkg && bootstrap-vcpkg.bat && cd ..  # [win]
-    - cd python
-    - {{ PYTHON }} -m pip install . -vv
+    - cd vcpkg/ && ./bootstrap-vcpkg.sh && cd ..  # [unix]
+    - cd vcpkg/ && bootstrap-vcpkg.bat && cd ..  # [win]
+    - {{ PYTHON }} -m pip install python/ -vv
   skip: true  # [py<35]
+  script_env:
+    - PYTHON
 
 requirements:
   build:
@@ -40,6 +41,7 @@ requirements:
     - curl  # [linux]
     - zip  # [linux]
     - pkg-config  # [linux, osx]
+    - pybind11
     - scikit-build-core
     - {{ compiler('cxx') }}
     - {{ stdlib("c") }}
