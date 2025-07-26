@@ -68,7 +68,7 @@ about:
   license: MIT
   license_family: MIT
   license_file: LICENSE
-  summary: A command line tool written in Python/C++ to analyse short-range order or generate SQS structures
+  summary: A command line tool written in Python/C++ to generate SQS structures
 
   description: |
     This package is a Special Quasirandom Structure generator written 
