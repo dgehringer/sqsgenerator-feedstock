@@ -7,7 +7,7 @@ Home: https://github.com/dgehringer/sqsgenerator
 
 Package license: MIT
 
-Summary: A command line tool written in Python/C++ to analyse short-range order or generate SQS structures
+Summary: A command line tool written in Python/C++ to generate SQS structures
 
 Development: https://github.com/dgehringer/sqsgenerator
 
