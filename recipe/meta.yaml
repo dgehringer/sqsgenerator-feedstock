@@ -20,7 +20,7 @@ build:
     vcpkg/bootstrap-vcpkg.sh  # [unix]
     vcpkg\bootstrap-vcpkg.bat  # [win]
     {{ PYTHON }} -m pip install python/ -v --no-deps --no-build-isolation  # [unix]
-    %PYTHON% -m pip install python/ -v --no-deps --no-build-isolation  # [win]
+    {{ PYTHON }} -m pip install python/ -v --no-deps --no-build-isolation  # [win]
   skip: true  # [ppc64le]
 
 requirements:
@@ -35,6 +35,10 @@ requirements:
     - pkg-config  # [linux, osx]
     - {{ compiler('cxx') }}
     - {{ stdlib("c") }}
+    - cross-python_{{ target_platform }}  # [build_platform != target_platform]
+    - python  # [build_platform != target_platform, not win]
+    - scikit-build-core  # [build_platform != target_platform]
+    - numpy  # [build_platform != target_platform]
   host:
     - pip
     - ninja  # [win]
