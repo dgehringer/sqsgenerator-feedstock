@@ -19,8 +19,9 @@ build:
     git clone https://github.com/microsoft/vcpkg.git
     vcpkg/bootstrap-vcpkg.sh  # [unix]
     vcpkg\bootstrap-vcpkg.bat  # [win]
-    ${PYTHON} -m pip install python/ -v --no-deps --no-build-isolation  # [unix]
+    {{ PYTHON }} -m pip install python/ -v --no-deps --no-build-isolation  # [unix]
     %PYTHON% -m pip install python/ -v --no-deps --no-build-isolation  # [win]
+  skip: true  # [ppc64le]
 
 requirements:
   build:
