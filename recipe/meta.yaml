@@ -14,10 +14,13 @@ build:
   number: 0
   entry_points:
     - sqsgen = sqsgenerator.cli:cli
-  script:
-   - {{ RECIPE_DIR }}\build_win.bat  # [win]
-   - {{ RECIPE_DIR }}/build_ppc64le.sh  # [ppc64le]
-   - {{ RECIPE_DIR }}/build_unix.sh  # [unix and not ppc64le]
+  script: |
+    git clone https://github.com/microsoft/vcpkg.git  # [not win]
+    vcpkg/bootstrap-vcpkg.sh  # [not win]
+    export CMAKE_ARGS="-DCMAKE_POLICY_VERSION_MINIMUM=3.5 ${CMAKE_ARGS}"  # [ppc64le]
+    export CXXFLAGS="${CXXFLAGS} -D_LIBCPP_DISABLE_AVAILABILITY"  # [unix]
+    {{ PYTHON }} scripts/patch-pyproject.py $SRC_DIR/python/pyproject.toml  # [ppc64le]
+    {{ PYTHON }} -m pip install python/ -v --no-deps --no-build-isolation  # [not win]
 
 requirements:
   build:
