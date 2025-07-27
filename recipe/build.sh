@@ -13,4 +13,4 @@ fi
 
 $PYTHON -m build -w -n -x python/
 
-$PYTHON -m pip install dist/sqsgenerator*.whl
+$PYTHON -m pip install python/dist/sqsgenerator*.whl
