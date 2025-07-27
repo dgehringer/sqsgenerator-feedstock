@@ -1,6 +1,8 @@
 #!/bin/bash
 set -ex
 
+TARGET_PLATFORM=$SUBDIR
+
 if [[ "${TARGET_PLATFORM}" == "linux-ppc64le" ]]; then
     export VCPKG_TARGET_TRIPLET="ppc64le-linux"
 elif [[ "${TARGET_PLATFORM}" == "osx-arm64" ]]; then
