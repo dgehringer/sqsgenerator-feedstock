@@ -28,8 +28,8 @@ requirements:
     - pkg-config  # [linux, osx]
     - {{ compiler('cxx') }}
     - {{ stdlib("c") }}
-    - cross-python_{{ target_platform }}  # [build_platform != target_platform and not win]
-    - python  # [build_platform != target_platform and not win]
+    - cross-python_{{ target_platform }}  # [build_platform != target_platform]
+    - python  # [build_platform != target_platform]
     - scikit-build-core  # [build_platform != target_platform]
     - numpy  # [build_platform != target_platform]
 
