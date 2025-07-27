@@ -15,13 +15,12 @@ build:
   entry_points:
     - sqsgen = sqsgenerator.cli:cli
   script: |
-    git clone https://github.com/microsoft/vcpkg.git
+    git clone https://github.com/microsoft/vcpkg.git  # [unix]
     vcpkg/bootstrap-vcpkg.sh  # [unix]
-    vcpkg\bootstrap-vcpkg.bat  # [win]
     export CMAKE_ARGS="-DCMAKE_POLICY_VERSION_MINIMUM=3.5 ${CMAKE_ARGS}"  # [ppc64le]
     export CXXFLAGS="${CXXFLAGS} -D_LIBCPP_DISABLE_AVAILABILITY"  # [unix]
     {{ PYTHON }} scripts/patch-pyproject.py $SRC_DIR/python/pyproject.toml  # [ppc64le]
-    cd python/ && {{ PYTHON }} -m pip install . -v
+    {{ PYTHON }} -m pip install python/ -v  # [not win]
 
 requirements:
   build:
@@ -40,8 +39,10 @@ requirements:
     - python  # [build_platform != target_platform and not win]
     - scikit-build-core
     - numpy  # [build_platform != target_platform]
+    -
   host:
     - pip
+    - python-build
     - ninja  # [win]
     - numpy
     - python
