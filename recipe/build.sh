@@ -5,12 +5,7 @@ git clone https://github.com/microsoft/vcpkg.git
 vcpkg/bootstrap-vcpkg.sh
 
 export CXXFLAGS="${CXXFLAGS} -D_LIBCPP_DISABLE_AVAILABILITY"
-
-if [[ "$target_platform" == linux-ppc64le ]]; then
-  export CMAKE_ARGS="-DCMAKE_POLICY_VERSION_MINIMUM=3.5 ${CMAKE_ARGS}"
-  $PYTHON scripts/patch-pyproject.py $SRC_DIR/python/pyproject.toml
-fi
-
+export VCPKG_FORCE_SYSTEM_BINARIES=1
 $PYTHON -m build -w -n -x python/
 
 $PYTHON -m pip install python/dist/sqsgenerator*.whl
