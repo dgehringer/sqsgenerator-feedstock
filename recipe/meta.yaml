@@ -20,7 +20,7 @@ build:
     export CMAKE_ARGS="-DCMAKE_POLICY_VERSION_MINIMUM=3.5 ${CMAKE_ARGS}"  # [ppc64le]
     export CXXFLAGS="${CXXFLAGS} -D_LIBCPP_DISABLE_AVAILABILITY"  # [unix]
     {{ PYTHON }} scripts/patch-pyproject.py $SRC_DIR/python/pyproject.toml  # [ppc64le]
-    {{ PYTHON }} -m pip install python/ -v --no-deps --no-build-isolation  # [not win]
+    {{ PYTHON }} -m pip install python/ -v --no-build-isolation  # [not win]
 
 requirements:
   build:
