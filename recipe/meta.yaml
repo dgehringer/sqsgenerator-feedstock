@@ -29,6 +29,7 @@ requirements:
     - make  # [unix]
     - cmake >=3.27.0
     - ninja
+    - toml # [ppc64le]
     - tar  # [linux]
     - unzip  # [linux]
     - curl  # [linux]
