@@ -22,7 +22,6 @@ build:
     vcpkg/bootstrap-vcpkg.sh  # [unix]
     vcpkg\bootstrap-vcpkg.bat  # [win]
     {{ PYTHON }} -m pip install python/ -v --no-deps --no-build-isolation
-  skip: true
 
 requirements:
   build:
