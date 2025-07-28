@@ -5,10 +5,13 @@ TARGET_PLATFORM=$SUBDIR
 
 if [[ "${TARGET_PLATFORM}" == "linux-ppc64le" ]]; then
     export VCPKG_TARGET_TRIPLET="ppc64le-linux"
+    export CMAKE_ARGS="-DVCPKG_TARGET_TRIPLET=${VCPKG_TARGET_TRIPLET} ${CMAKE_ARGS}"
 elif [[ "${TARGET_PLATFORM}" == "osx-arm64" ]]; then
     export VCPKG_TARGET_TRIPLET="arm64-osx"
+    export CMAKE_ARGS="-DVCPKG_TARGET_TRIPLET=${VCPKG_TARGET_TRIPLET} ${CMAKE_ARGS}"
 elif [[ "${TARGET_PLATFORM}" == "osx-64" ]]; then
    export VCPKG_TARGET_TRIPLET="x64-osx"
+   export CMAKE_ARGS="-DVCPKG_TARGET_TRIPLET=${VCPKG_TARGET_TRIPLET} ${CMAKE_ARGS}"
 fi
 
 git clone https://github.com/microsoft/vcpkg.git
