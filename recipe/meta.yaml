@@ -6,12 +6,12 @@ package:
   version: {{ version }}
 
 source:
-  url: https://github.com/dgehringer/sqsgenerator/archive/v{{ version }}-rc.2.tar.gz
-  sha256: a951a4a878930133b4201d84621a992e568370281c47d8e995e4a4f49094d7ab
+  url: https://github.com/dgehringer/sqsgenerator/archive/v{{ version }}-rc.3.tar.gz
+  sha256: 24169f1d9afd214e13eff1e2d1ed710f87eb89ac0f02a2393cd86369139a2cae
 
 
 build:
-  number: 0
+  number: 1
   entry_points:
     - sqsgen = sqsgenerator.cli:cli
   skip: true  # [ppc64le]
