@@ -3,7 +3,9 @@ set -ex
 
 TARGET_PLATFORM=$SUBDIR
 
-if [[ "${TARGET_PLATFORM}" == "linux-ppc64le" ]]; then
+if [[ "${TARGET_PLATFORM}" == "linux-aarch64" ]]; then
+    export export CMAKE_ARGS="-DCMAKE_MAKE_PROGRAM=Ninja ${CMAKE_ARGS}"
+elif [[ "${TARGET_PLATFORM}" == "linux-ppc64le" ]]; then
     export VCPKG_TARGET_TRIPLET="ppc64le-linux"
     export CMAKE_ARGS="-DVCPKG_TARGET_TRIPLET=${VCPKG_TARGET_TRIPLET} ${CMAKE_ARGS}"
 elif [[ "${TARGET_PLATFORM}" == "osx-arm64" ]]; then
