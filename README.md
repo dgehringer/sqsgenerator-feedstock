@@ -14,7 +14,7 @@ Development: https://github.com/dgehringer/sqsgenerator
 Documentation: https://sqsgenerator.readthedocs.io/en/latest
 
 This package is a Special Quasirandom Structure generator written
-in Python3/C++
+in C++
 
 
 Current build status
