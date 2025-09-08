@@ -1,17 +1,17 @@
 {% set name = "sqsgenerator" %}
-{% set version = "0.4.9" %}
+{% set version = "0.5.2" %}
 
 package:
   name: {{ name|lower }}
   version: {{ version }}
 
 source:
-  url: https://github.com/dgehringer/sqsgenerator/archive/v{{ version }}-rc.3.tar.gz
-  sha256: 24169f1d9afd214e13eff1e2d1ed710f87eb89ac0f02a2393cd86369139a2cae
+  url: https://github.com/dgehringer/sqsgenerator/archive/v{{ version }}.tar.gz
+  sha256: 4e102cd4df05683bede4de80c037fceb2c8d25e3503c8063e76248b3e6e85003
 
 
 build:
-  number: 2
+  number: 0
   entry_points:
     - sqsgen = sqsgenerator.cli:cli
   skip: true  # [ppc64le]
@@ -62,7 +62,7 @@ about:
 
   description: |
     This package is a Special Quasirandom Structure generator written 
-    in Python3/C++
+    in C++
   doc_url: https://sqsgenerator.readthedocs.io/en/latest
   dev_url: https://github.com/dgehringer/sqsgenerator
 
