@@ -1,5 +1,5 @@
 {% set name = "sqsgenerator" %}
-{% set version = "0.5.3" %}
+{% set version = "0.5.4" %}
 
 package:
   name: {{ name | lower }}
@@ -7,11 +7,11 @@ package:
 
 source:
   url: https://github.com/dgehringer/sqsgenerator/archive/v{{ version }}.tar.gz
-  sha256: d6f057b3874bfa494133b3d5a00fb941a5d28c5b0398b4dde04833305f94da8b
+  sha256: b76f396fc833186679c06f989d1ca5fda1ca87c5f860d34d50dc58805d6b3087
 
 
 build:
-  number: 1
+  number: 0
   entry_points:
     - sqsgen = sqsgenerator.cli:cli
   skip: true  # [ppc64le]
